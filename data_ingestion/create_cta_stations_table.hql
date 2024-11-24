@@ -22,7 +22,7 @@ CREATE EXTERNAL TABLE kjwassell_cta_stations(
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (
-    "separatorChar" = ",",
+    "separatorChar" = "\,",
     "quoteChar"     = "\""
 )
 STORED AS TEXTFILE

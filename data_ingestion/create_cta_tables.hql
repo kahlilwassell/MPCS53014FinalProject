@@ -17,7 +17,7 @@ LOCATION '/kjwassell/cta_data/stations/';
 -- External table for CTA ridership data
 CREATE EXTERNAL TABLE IF NOT EXISTS kjwassell_cta_ridership (
     station_id INT,
-    date DATE,
+    entry_date DATE, -- Renamed from 'date' to 'entry_date'
     daily_entries INT
 )
 ROW FORMAT DELIMITED

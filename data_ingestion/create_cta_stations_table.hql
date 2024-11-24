@@ -1,5 +1,7 @@
+DROP TABLE IF EXISTS kjwassell_cta_stations;
+
 -- External table for CTA stations metadata
-CREATE EXTERNAL TABLE IF NOT EXISTS kjwassell_cta_stations (
+CREATE EXTERNAL TABLE kjwassell_cta_stations(
     stop_id INT,
     direction STRING,
     stop_name STRING,
@@ -18,10 +20,15 @@ CREATE EXTERNAL TABLE IF NOT EXISTS kjwassell_cta_stations (
     o BOOLEAN,
     location STRING
 )
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY ','
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+    "separatorChar" = ",",
+    "quoteChar"     = "\""
+)
 STORED AS TEXTFILE
-LOCATION '/kjwassell/cta_data/stations/';
+LOCATION '/kjwassell/cta_data/stations'
+TBLPROPERTIES("skip.header.line.count"="1");
+
 
 -- Validate table creation with a sample query
 SELECT * FROM kjwassell_cta_stations LIMIT 10;

@@ -10,29 +10,36 @@ BEELINE_CONN="jdbc:hive2://10.0.0.50:10001/;transportMode=http"
 echo "Cleaning up existing HDFS files..."
 hdfs dfs -rm -r -skipTrash $HDFS_BASE_DIR/*
 
-# Step 2: Remove headers from stations file
-echo "Removing headers from stations file..."
-tail -n +2 "$LOCAL_BASE_DIR/CTA_-_System_Information_-_List_of__L__Stops.csv" > "$LOCAL_BASE_DIR/stations_no_header.csv"
-
-# Step 3: Create HDFS directory for stations
+# Step 2: Create HDFS directory for stations
 echo "Creating HDFS directory for stations..."
 hdfs dfs -mkdir -p $HDFS_BASE_DIR/stations
 
-# Step 4: Upload stations data to HDFS
+# Step 3: Upload stations data to HDFS
+STATIONS_FILE="$LOCAL_BASE_DIR/CTA_-_System_Information_-_List_of__L__Stops.csv"
 echo "Uploading stations data to HDFS..."
-hdfs dfs -put -f "$LOCAL_BASE_DIR/stations_no_header.csv" $HDFS_BASE_DIR/stations/
+if [[ -f "$STATIONS_FILE" ]]; then
+    hdfs dfs -put -f "$STATIONS_FILE" $HDFS_BASE_DIR/stations/
+else
+    echo "Error: Stations file $STATIONS_FILE not found."
+    exit 1
+fi
 
 # Verify upload
 echo "Verifying HDFS upload for stations data..."
 hdfs dfs -ls $HDFS_BASE_DIR/stations
+if [[ $? -ne 0 ]]; then
+    echo "Error: Failed to upload stations data to HDFS."
+    exit 1
+fi
 
-# Step 5: Execute the HiveQL file using Beeline
+# Step 4: Execute the HiveQL file using Beeline
 echo "Executing HiveQL file using Beeline..."
 beeline -u "$BEELINE_CONN" -f "$HQL_FILE" > beeline_output.log 2> beeline_error.log
 
 # Check for errors during execution
 if [[ $? -ne 0 ]]; then
     echo "Error: Failed to execute HiveQL file $HQL_FILE using Beeline."
+    echo "Check beeline_error.log for details."
     exit 1
 else
     echo "Hive table for stations created and data loaded successfully."

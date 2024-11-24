@@ -14,7 +14,7 @@ FIELDS TERMINATED BY ','
 STORED AS TEXTFILE;
 
 -- Load data into Stations Table
-LOAD DATA INPATH '/cta_data/stations/CTA_-_System_Information_-_List_of__L__Stops.csv'
+LOAD DATA INPATH '/kjwassell/cta_data/stations/CTA_-_System_Information_-_List_of__L__Stops.csv'
 INTO TABLE cta_stations;
 
 -- Create Ridership Table
@@ -28,7 +28,7 @@ FIELDS TERMINATED BY ','
 STORED AS TEXTFILE;
 
 -- Load data into Ridership Table
-LOAD DATA INPATH '/cta_data/ridership/CTA_-_Ridership_-__L__Station_Entries_-_Daily_Totals.csv'
+LOAD DATA INPATH '/kjwassell/cta_data/ridership/CTA_-_Ridership_-__L__Station_Entries_-_Daily_Totals.csv'
 INTO TABLE cta_ridership;
 
 -- Create Routes Table
@@ -43,5 +43,5 @@ FIELDS TERMINATED BY ','
 STORED AS TEXTFILE;
 
 -- Load data into Routes Table
-LOAD DATA INPATH '/cta_data/routes/routes.txt'
+LOAD DATA INPATH '/kjwassell/cta_data/routes/routes.txt'
 INTO TABLE cta_routes;

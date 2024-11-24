@@ -1,5 +1,5 @@
 -- External table for CTA stations metadata
-CREATE EXTERNAL TABLE IF NOT EXISTS cta_stations (
+CREATE EXTERNAL TABLE IF NOT EXISTS kjwassell_cta_stations (
     stop_id INT,
     direction STRING,
     stop_name STRING,
@@ -15,7 +15,7 @@ STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/stations/';
 
 -- External table for CTA ridership data
-CREATE EXTERNAL TABLE IF NOT EXISTS cta_ridership (
+CREATE EXTERNAL TABLE IF NOT EXISTS kjwassell_cta_ridership (
     station_id INT,
     date DATE,
     daily_entries INT
@@ -26,7 +26,7 @@ STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/ridership/';
 
 -- External table for CTA routes data
-CREATE EXTERNAL TABLE IF NOT EXISTS cta_routes (
+CREATE EXTERNAL TABLE IF NOT EXISTS kjwassell_cta_routes (
     route_id STRING,
     route_short_name STRING,
     route_long_name STRING,
@@ -38,6 +38,6 @@ STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/routes/';
 
 -- Validate table creation with sample queries
-SELECT * FROM cta_stations LIMIT 10;
-SELECT * FROM cta_ridership LIMIT 10;
-SELECT * FROM cta_routes LIMIT 10;
+SELECT * FROM kjwassell_cta_stations LIMIT 10;
+SELECT * FROM kjwassell_cta_ridership LIMIT 10;
+SELECT * FROM kjwassell_cta_routes LIMIT 10;

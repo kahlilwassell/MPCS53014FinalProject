@@ -1,5 +1,5 @@
 -- Create Stations Table
-CREATE TABLE IF NOT EXISTS cta_stations (
+CREATE EXTERNAL TABLE IF NOT EXISTS cta_stations (
     stop_id INT,
     direction STRING,
     stop_name STRING,
@@ -11,28 +11,22 @@ CREATE TABLE IF NOT EXISTS cta_stations (
 )
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
-STORED AS TEXTFILE;
-
--- Load data into Stations Table
-LOAD DATA INPATH '/kjwassell/cta_data/stations/CTA_-_System_Information_-_List_of__L__Stops.csv'
-INTO TABLE cta_stations;
+STORED AS TEXTFILE
+LOCATION '/kjwassell/cta_data/stations/';
 
 -- Create Ridership Table
-CREATE TABLE IF NOT EXISTS cta_ridership (
+CREATE EXTERNAL TABLE IF NOT EXISTS cta_ridership (
     station_id INT,
     date DATE,
     daily_entries INT
 )
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
-STORED AS TEXTFILE;
-
--- Load data into Ridership Table
-LOAD DATA INPATH '/kjwassell/cta_data/ridership/CTA_-_Ridership_-__L__Station_Entries_-_Daily_Totals.csv'
-INTO TABLE cta_ridership;
+STORED AS TEXTFILE
+LOCATION '/kjwassell/cta_data/ridership/';
 
 -- Create Routes Table
-CREATE TABLE IF NOT EXISTS cta_routes (
+CREATE EXTERNAL TABLE IF NOT EXISTS cta_routes (
     route_id STRING,
     route_short_name STRING,
     route_long_name STRING,
@@ -40,8 +34,5 @@ CREATE TABLE IF NOT EXISTS cta_routes (
 )
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
-STORED AS TEXTFILE;
-
--- Load data into Routes Table
-LOAD DATA INPATH '/kjwassell/cta_data/routes/routes.txt'
-INTO TABLE cta_routes;
+STORED AS TEXTFILE
+LOCATION '/kjwassell/cta_data/routes/';

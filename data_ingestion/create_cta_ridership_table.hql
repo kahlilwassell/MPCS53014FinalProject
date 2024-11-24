@@ -1,9 +1,11 @@
+DROP TABLE IF EXISTS kjwassell_cta_ridership;
+
 CREATE EXTERNAL TABLE kjwassell_cta_ridership(
-    station_id INT,
+    station_id STRING,
     stationname STRING,
     `date` STRING,
     daytype STRING,
-    rides INT
+    rides STRING
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (

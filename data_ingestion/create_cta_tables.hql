@@ -1,4 +1,4 @@
--- Create Stations Table
+-- External table for CTA stations metadata
 CREATE EXTERNAL TABLE IF NOT EXISTS cta_stations (
     stop_id INT,
     direction STRING,
@@ -14,7 +14,7 @@ FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/stations/';
 
--- Create Ridership Table
+-- External table for CTA ridership data
 CREATE EXTERNAL TABLE IF NOT EXISTS cta_ridership (
     station_id INT,
     date DATE,
@@ -25,7 +25,7 @@ FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/ridership/';
 
--- Create Routes Table
+-- External table for CTA routes data
 CREATE EXTERNAL TABLE IF NOT EXISTS cta_routes (
     route_id STRING,
     route_short_name STRING,
@@ -36,3 +36,8 @@ ROW FORMAT DELIMITED
 FIELDS TERMINATED BY ','
 STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/routes/';
+
+-- Validate table creation with sample queries
+SELECT * FROM cta_stations LIMIT 10;
+SELECT * FROM cta_ridership LIMIT 10;
+SELECT * FROM cta_routes LIMIT 10;

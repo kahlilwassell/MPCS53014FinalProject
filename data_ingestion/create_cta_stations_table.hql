@@ -22,13 +22,15 @@ CREATE EXTERNAL TABLE kjwassell_cta_stations(
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (
-    "separatorChar" = "\,",
+    "separatorChar" = ",",  -- Removed the escape character before the comma
     "quoteChar"     = "\""
 )
 STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/stations'
 TBLPROPERTIES("skip.header.line.count"="1");
 
-
 -- Validate table creation with a sample query
-SELECT * FROM kjwassell_cta_stations LIMIT 10;
+-- Note: Hive does not allow SELECT in the same script as table creation.
+-- Run this query after table creation is confirmed.
+-- SELECT * FROM kjwassell_cta_stations LIMIT 10;
+

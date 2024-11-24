@@ -1,12 +1,9 @@
-DROP TABLE IF EXISTS kjwassell_cta_ridership;
-
--- External table for CTA stations metadata
-CREATE EXTERNAL TABLE kjwassell_cta_ridership(
-    station_id INT,
+CREATE EXTERNAL TABLE kjwassell_cta_ridership_raw (
+    station_id STRING,
     station_name STRING,
     entry_date STRING,
     day_type STRING,
-    daily_entries INT
+    daily_entries STRING
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (
@@ -15,7 +12,8 @@ WITH SERDEPROPERTIES (
 )
 STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/ridership'
-TBLPROPERTIES("skip.header.line.count"="1");
+TBLPROPERTIES ("skip.header.line.count" = "1");
+
 
 -- Validate table creation with a sample query
 -- Note: Hive does not allow SELECT in the same script as table creation.

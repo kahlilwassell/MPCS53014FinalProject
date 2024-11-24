@@ -3,7 +3,7 @@
 # Define directories and files
 HDFS_BASE_DIR="/kjwassell/cta_data"
 LOCAL_BASE_DIR="~/kjwassell/MPCS53014FinalProject/raw_data"
-HQL_FILE="/path/to/create_cta_tables.hql"
+HQL_FILE="~/kjwassell/MPCS53014FinalProject/data_ingestion/create_cta_tables.hql"
 BEELINE_CONN="jdbc:hive2://10.0.0.50:10001/;transportMode=http"
 
 # Step 1: Create HDFS directories

@@ -16,12 +16,16 @@ done
 
 # Step 2: Upload data to HDFS
 echo "Uploading data to HDFS..."
-for file in CTA_-_System_Information_-_List_of__L__Stops.csv \
-            CTA_-_Ridership_-__L__Station_Entries_-_Daily_Totals.csv \
-            routes.txt; do
-    base_dir=$(echo $file | awk -F'_' '{print tolower($2)}') # Extract dir name like stations/ridership
-    if ! hdfs dfs -test -e $HDFS_BASE_DIR/$base_dir/$file; then
-        hdfs dfs -put -f $LOCAL_BASE_DIR/$file $HDFS_BASE_DIR/$base_dir/
+declare -A file_to_dir=(
+    ["CTA_-_System_Information_-_List_of__L__Stops.csv"]="stations"
+    ["CTA_-_Ridership_-__L__Station_Entries_-_Daily_Totals.csv"]="ridership"
+    ["routes.txt"]="routes"
+)
+
+for file in "${!file_to_dir[@]}"; do
+    target_dir="${file_to_dir[$file]}"
+    if ! hdfs dfs -test -e $HDFS_BASE_DIR/$target_dir/$file; then
+        hdfs dfs -put -f $LOCAL_BASE_DIR/$file $HDFS_BASE_DIR/$target_dir/
     fi
 done
 
@@ -43,3 +47,4 @@ fi
 
 # Success message
 echo "HDFS upload and Hive table setup completed successfully."
+

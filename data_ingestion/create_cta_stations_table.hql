@@ -1,12 +1,12 @@
-DROP TABLE IF EXISTS kjwassell_cta_stations;
+DROP TABLE IF EXISTS kjwassell_cta_stations_csv;
 
 -- External table for CTA stations metadata
-CREATE EXTERNAL TABLE kjwassell_cta_stations(
+CREATE EXTERNAL TABLE kjwassell_cta_stations_csv(
     stop_id INT,
-    direction STRING,
+    direction_id STRING,
     stop_name STRING,
     station_name STRING,
-    station_description STRING,
+    station_descriptive_name STRING,
     map_id INT,
     ada BOOLEAN,
     red BOOLEAN,
@@ -18,19 +18,14 @@ CREATE EXTERNAL TABLE kjwassell_cta_stations(
     y BOOLEAN,
     pnk BOOLEAN,
     o BOOLEAN,
-    location STRING
+    latitude FLOAT,
+    longitude FLOAT
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES (
-    "separatorChar" = ",",  -- Removed the escape character before the comma
+    "separatorChar" = ",",
     "quoteChar"     = "\""
 )
 STORED AS TEXTFILE
 LOCATION '/kjwassell/cta_data/stations'
 TBLPROPERTIES("skip.header.line.count"="1");
-
--- Validate table creation with a sample query
--- Note: Hive does not allow SELECT in the same script as table creation.
--- Run this query after table creation is confirmed.
--- SELECT * FROM kjwassell_cta_stations LIMIT 10;
-

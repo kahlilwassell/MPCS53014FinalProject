@@ -3,7 +3,7 @@
 # Define directories and files
 HADOOP_BASE_DIR="/kjwassell/cta_data"
 LOCAL_BASE_DIR="$HOME/kjwassell/MPCS53014FinalProject/raw_data"
-HQL_FILE="$HOME/kjwassell/MPCS53014FinalProject/data_ingestion/create_cta_ridership_table.hql"
+HQL_FILE="$HOME/kjwassell/MPCS53014FinalProject/batch_layer/create_cta_ridership_table.hql"
 BEELINE_CONN="jdbc:hive2://10.0.0.50:10001/;transportMode=http"
 
 # Step 1: Clean up Hadoop directories

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Variables
-HQL_FILE="/path/to/convert_to_orc_tables.hql"    # Path to your HQL file
+HQL_FILE="$HOME/kjwassell/MPCS53014FinalProject/batch_layer/convert_to_orc_tables.hql"    # Path to your HQL file
 BEELINE_CMD="beeline"                             # Beeline command (ensure it's in PATH)
 HIVE_SERVER="jdbc:hive2://10.0.0.50:10001/"       # Hive server connection string
 TRANSPORT_MODE="http"                             # Transport mode

@@ -6,14 +6,15 @@ CREATE TABLE kjwassell_cta_ridership_orc (
     daytype STRING,
     rides INT
 )
-STORED AS ORC;
+STORED AS ORC
+TBLPROPERTIES ("orc.compress"="ZLIB");;
 
 # insert data from the csv table with correct type.
 INSERT INTO kjwassell_cta_ridership_orc
 SELECT
     station_id,
     stationname,
-    TO_DATE(FROM_UNIXTIME(UNIX_TIMESTAMP(date, 'MM/dd/yyyy'))) AS `date`,
+    TO_DATE(FROM_UNIXTIME(UNIX_TIMESTAMP(`date`, 'MM/dd/yyyy'))) AS DATE,
     daytype,
     CAST(rides AS INT)
 FROM
@@ -41,7 +42,8 @@ CREATE TABLE kjwassell_cta_stations_orc (
     latitude FLOAT,
     longitude FLOAT
 )
-STORED AS ORC;
+STORED AS ORC
+TBLPROPERTIES ("orc.compress"="ZLIB");;
 
 INSERT INTO kjwassell_cta_stations_orc
 SELECT

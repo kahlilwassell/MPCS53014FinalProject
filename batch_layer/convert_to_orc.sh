@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Variables
-HQL_FILE="/path/to/translate_to_orc_tables.hql"    # Path to your HQL file
+HQL_FILE="/path/to/convert_to_orc_tables.hql"    # Path to your HQL file
 BEELINE_CMD="beeline"                             # Beeline command (ensure it's in PATH)
 HIVE_SERVER="jdbc:hive2://10.0.0.50:10001/"       # Hive server connection string
 TRANSPORT_MODE="http"                             # Transport mode
-LOG_DIR="/kjwassell"          # Directory to store logs
+LOG_DIR="$HOME/kjwassell"                         # Directory to store logs
 OUTPUT_LOG="$LOG_DIR/orc_conversion_output.log"   # Path to output log
 ERROR_LOG="$LOG_DIR/orc_conversion_error.log"     # Path to error log
 

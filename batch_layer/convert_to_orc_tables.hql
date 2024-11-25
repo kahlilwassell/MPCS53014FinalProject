@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS kjwassell_cta_ridership_orc;
 # make an orc version of the ridership table
 CREATE TABLE kjwassell_cta_ridership_orc (
     station_id STRING,
@@ -20,7 +21,7 @@ SELECT
 FROM
     kjwassell_cta_ridership_csv;
 
-
+DROP TABLE IF EXISTS kjwassell_cta_stations_orc;
 # make an orc version of the stations table
 CREATE TABLE kjwassell_cta_stations_orc (
     stop_id STRING,

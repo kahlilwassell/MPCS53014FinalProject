@@ -15,7 +15,7 @@ INSERT INTO kjwassell_cta_ridership_orc
 SELECT
     station_id,
     stationname,
-    TO_DATE(FROM_UNIXTIME(UNIX_TIMESTAMP(`date`, 'MM/dd/yyyy'))) AS DATE,
+    TO_DATE(FROM_UNIXTIME(UNIX_TIMESTAMP(`date`, 'MM/dd/yyyy'))),
     daytype,
     CAST(rides AS INT)
 FROM

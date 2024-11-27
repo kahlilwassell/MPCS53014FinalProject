@@ -1,0 +1,26 @@
+<html>
+<head>
+    <title>Daily Ridership</title>
+</head>
+<body>
+    <h1>Daily Ridership Data</h1>
+    <table border="1">
+        <tr>
+            <th>Row Key</th>
+            <th>Station ID</th>
+            <th>Station Name</th>
+            <th>Date</th>
+            <th>Total Rides</th>
+        </tr>
+        {{#records}}
+        <tr>
+            <td>{{rowKey}}</td>
+            <td>{{station_id}}</td>
+            <td>{{stationname}}</td>
+            <td>{{date}}</td>
+            <td>{{total_rides}}</td>
+        </tr>
+        {{/records}}
+    </table>
+</body>
+</html>

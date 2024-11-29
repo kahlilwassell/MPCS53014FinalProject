@@ -16,6 +16,7 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
 
+
 def fetch_train_positions(route):
     """Fetch train positions for a specific route."""
     url = f"{API_BASE_URL}ttpositions.aspx"
@@ -31,6 +32,7 @@ def fetch_train_positions(route):
         print(f"Error fetching train positions: {response.status_code} - {response.text}")
         return None
 
+
 def publish_to_kafka(topic, data):
     """Publish data to Kafka."""
     try:
@@ -39,19 +41,21 @@ def publish_to_kafka(topic, data):
     except Exception as e:
         print(f"Error publishing to Kafka: {e}")
 
+
 def main():
     """Main producer loop."""
     # Example routes to monitor; extend as needed
     routes = ["red", "blue", "green"]
-    
+
     while True:
         for route in routes:
             data = fetch_train_positions(route)
             if data:
                 publish_to_kafka(TRAIN_POSITIONS_TOPIC, data)
-        
+
         # Simulate data fetching interval
         time.sleep(30)  # Adjust as needed for real-time requirements
+
 
 if __name__ == "__main__":
     main()

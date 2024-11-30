@@ -1,26 +1,134 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Daily Ridership</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTA Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #fff;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+        th {
+            background-color: #0073e6;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Daily Ridership Data</h1>
-    <table border="1">
-        <tr>
-            <th>Row Key</th>
-            <th>Station ID</th>
-            <th>Station Name</th>
-            <th>Date</th>
-            <th>Total Rides</th>
-        </tr>
-        {{#records}}
-        <tr>
-            <td>{{rowKey}}</td>
-            <td>{{station_id}}</td>
-            <td>{{stationname}}</td>
-            <td>{{date}}</td>
-            <td>{{total_rides}}</td>
-        </tr>
-        {{/records}}
-    </table>
+    <div class="container">
+        <h1>CTA Dashboard</h1>
+
+        {{#rides}}
+        <h2>Average Rides by Day</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Station Name</th>
+                    <th>Station ID</th>
+                    <th>Average Rides</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#rides}}
+                <tr>
+                    <td>{{day}}</td>
+                    <td>{{station_name}}</td>
+                    <td>{{station_id}}</td>
+                    <td>{{avg_rides}}</td>
+                </tr>
+                {{/rides}}
+            </tbody>
+        </table>
+        {{/rides}}
+
+        {{#ridership}}
+        <h2>Daily Ridership</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Station Name</th>
+                    <th>Station ID</th>
+                    <th>Rides</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#ridership}}
+                <tr>
+                    <td>{{date}}</td>
+                    <td>{{day}}</td>
+                    <td>{{station_name}}</td>
+                    <td>{{station_id}}</td>
+                    <td>{{rides}}</td>
+                </tr>
+                {{/ridership}}
+            </tbody>
+        </table>
+        {{/ridership}}
+
+        {{#stations}}
+        <h2>Station Information</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Map ID</th>
+                    <th>Station Name</th>
+                    <th>ADA Accessible</th>
+                    <th>Red Line</th>
+                    <th>Blue Line</th>
+                    <th>Green Line</th>
+                    <th>Brown Line</th>
+                    <th>Purple Line</th>
+                    <th>Pink Line</th>
+                    <th>Orange Line</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#stations}}
+                <tr>
+                    <td>{{map_id}}</td>
+                    <td>{{station_name}}</td>
+                    <td>{{#ada}}Yes{{/ada}}{{^ada}}No{{/ada}}</td>
+                    <td>{{#red}}Yes{{/red}}{{^red}}No{{/red}}</td>
+                    <td>{{#blue}}Yes{{/blue}}{{^blue}}No{{/blue}}</td>
+                    <td>{{#g}}Yes{{/g}}{{^g}}No{{/g}}</td>
+                    <td>{{#brn}}Yes{{/brn}}{{^brn}}No{{/brn}}</td>
+                    <td>{{#p}}Yes{{/p}}{{^p}}No{{/p}}</td>
+                    <td>{{#pnk}}Yes{{/pnk}}{{^pnk}}No{{/pnk}}</td>
+                    <td>{{#o}}Yes{{/o}}{{^o}}No{{/o}}</td>
+                </tr>
+                {{/stations}}
+            </tbody>
+        </table>
+        {{/stations}}
+
+        <p style="text-align: center;">CTA Data Dashboard &copy; 2024</p>
+    </div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html lang="en">
     <head>
-        <title>Result</title>
+        <title>CTA Summary Metrics</title>
         <link type="text/css" rel="stylesheet" href="table.css" />
     </head>
     <body>
@@ -12,12 +12,16 @@
                 <tr>
                     <td>Station</td>
                     <td>Day of the Week</td>
-                    <td>Average Station Entries</td>
+                    <td>Average Station Entries For {{day}}</td>
+                    <td>ADA Compliant</td>
+                    <td>Lines Serviced</td>
                 </tr>
             <tr>
                 <td>{{station_name}}</td>
                 <td>{{day}}</td>
                 <td>{{avg_rides}}</td>
+                <td>{{ada}}</td>
+                <td>{{lines_serviced}}</td>
             </tr>
             </table>
         </p>

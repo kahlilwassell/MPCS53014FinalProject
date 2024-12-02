@@ -16,14 +16,34 @@
                     <td>ADA Compliant</td>
                     <td>Lines Serviced</td>
                 </tr>
-            <tr>
-                <td>{{station_name}}</td>
-                <td>{{day}}</td>
-                <td>{{avg_rides}}</td>
-                <td>{{ada}}</td>
-                <td>{{lines_serviced}}</td>
-            </tr>
+                <tr>
+                    <td>{{station_name}}</td>
+                    <td>{{day}}</td>
+                    <td>{{avg_rides}}</td>
+                    <td>{{ada}}</td>
+                    <td>{{lines_serviced}}</td>
+                </tr>
             </table>
         </p>
+        <div style="margin-left:275px;margin-right:auto;display:inline-block;box-shadow: 10px 10px 5px #888888;border:1px solid #000000;-moz-border-radius-bottomleft:9px;-webkit-border-bottom-left-radius:9px;border-bottom-left-radius:9px;-moz-border-radius-bottomright:9px;-webkit-border-bottom-right-radius:9px;border-bottom-right-radius:9px;-moz-border-radius-topright:9px;-webkit-border-top-right-radius:9px;border-top-right-radius:9px;-moz-border-radius-topleft:9px;-webkit-border-top-left-radius:9px;border-top-left-radius:9px;background:white">
+            &nbsp;CTA Train Arrivals for {{station_name}}&nbsp;</div>
+            <p style="bottom-margin:10px">
+                <table class="CSS_Table_Example" style="width:60%;margin:auto;">
+                    <tr>
+                        <td>Route</td>
+                        <td>Arrival Time</td>
+                        <td>Approaching</td>
+                        <td>Destination</td>
+                    </tr>
+                    {{#arrivals}}
+                    <tr>
+                        <td>{{route}}</td>
+                        <td>{{arrival_time}}</td>
+                        <td>{{is_approaching}}</td>
+                        <td>{{destination}}</td>
+                    </tr>
+                    {{/arrivals}}
+                </table>
+            </p>
     </body>
 </html>

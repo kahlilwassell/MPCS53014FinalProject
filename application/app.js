@@ -6,11 +6,12 @@ const app = express();
 const mustache = require('mustache');
 const filesystem = require('fs');
 require('dotenv').config();
-const port = Number(process.argv[2]);
 const hbase = require('hbase');
 const moment = require('moment');
+const axios = require('axios');
 
-const url = new URL(process.argv[3]);
+const port = Number(process.argv[2]);
+const url = new URL(process.env.HBASE_REST_URL);
 
 var hclient = hbase({
     host: url.hostname,
@@ -68,8 +69,8 @@ const day = moment().format('dd');
 
 // application code
 app.use(express.static('public'));
-
-app.get('/cta_stop_summary.html', function (req, res) {
+// Endpoint to get stop summary including arrivals
+app.get('/cta_stop_summary.html', async function (req, res) {
     const station = req.query['station'];
 
     if (!station) {
@@ -77,61 +78,76 @@ app.get('/cta_stop_summary.html', function (req, res) {
         return;
     }
 
-    // Query HBase for daily average rides
-    hclient.table('kjwassell_cta_avg_rides_by_day_hbase')
-        .row(`${station}_${day}`)
-        .get((err, row) => {
-            if (err) {
-                console.error("Error retrieving data from HBase (avg rides):", err);
-                res.status(500).send("Error fetching data.");
-                return;
-            }
-
-            if (!row || row.length === 0) {
-                res.status(404).send("No data found for the specified station and day.");
-                return;
-            }
-
-            const avgRideData = rowToMap(row);
-
-            // Query HBase for station view data
-            hclient.table('kjwassell_cta_station_view_hbase')
-                .row(`${station}`)
-                .get((err, stationRow) => {
-                    if (err) {
-                        console.error("Error retrieving data from HBase (station view):", err);
-                        res.status(500).send("Error fetching data.");
-                        return;
-                    }
-
-                    if (!stationRow || stationRow.length === 0) {
-                        res.status(404).send("No station view data found for the specified station.");
-                        return;
-                    }
-
-                    const stationViewData = rowToMap(stationRow);
-
-                    const template = filesystem.readFileSync("result.mustache").toString();
-                    const rendered = mustache.render(template, {
-                        station_name: avgRideData['data:station_name'],
-                        day,
-                        avg_rides: Math.round(avgRideData['data:avg_rides']),
-                        ada: stationViewData['data:ada'] ? "Yes" : "No",
-                        lines_serviced: [
-                            stationViewData['data:red'] ? "Red" : null,
-                            stationViewData['data:blue'] ? "Blue" : null,
-                            stationViewData['data:g'] ? "Green" : null,
-                            stationViewData['data:brn'] ? "Brown" : null,
-                            stationViewData['data:p'] ? "Purple" : null,
-                            stationViewData['data:pexp'] ? "Purple Express" : null,
-                            stationViewData['data:y'] ? "Yellow" : null,
-                            stationViewData['data:pnk'] ? "Pink" : null,
-                            stationViewData['data:o'] ? "Orange" : null,
-                        ].filter(line => line).join(", ") // Filter out nulls and join the lines
-                    });
-                    res.send(rendered);
+    try {
+        // Query HBase for daily average rides
+        const avgRideData = await new Promise((resolve, reject) => {
+            hclient.table('kjwassell_cta_avg_rides_by_day_hbase')
+                .row(`${station}_${moment().format('dd')}`)
+                .get((err, row) => {
+                    if (err || !row) return reject("No data found for daily average rides.");
+                    resolve(rowToMap(row));
                 });
         });
+
+        // Query HBase for station view data
+        const stationViewData = await new Promise((resolve, reject) => {
+            hclient.table('kjwassell_cta_station_view_hbase')
+                .row(station)
+                .get((err, row) => {
+                    if (err || !row) return reject("No station view data found.");
+                    resolve(rowToMap(row));
+                });
+        });
+
+        // Fetch train arrivals from the API
+        const mapId = stationViewData['data:map_id'];
+        const trainArrivals = await axios.get(`${process.env.API_BASE_URL}${process.env.ARRIVALS_ENDPOINT}`, {
+            params: {
+                key: process.env.CTA_API_KEY,
+                mapid: mapId,
+                outputType: 'JSON',
+                max: 10,
+            },
+        });
+
+        const arrivalsData = trainArrivals.data.ctatt?.eta || [];
+
+        // Render the response using Mustache
+        const template = filesystem.readFileSync("result.mustache").toString();
+
+        function formatDateTime(isoString) {
+            return moment(isoString).format('dddd, MMMM Do YYYY, h:mm:ss A');
+        }
+
+        const rendered = mustache.render(template, {
+            station_name: avgRideData['data:station_name'],
+            day: moment().format('dddd'),
+            avg_rides: Math.round(avgRideData['data:avg_rides']),
+            ada: stationViewData['data:ada'] === 'true' ? "Yes" : "No",
+            lines_serviced: [
+                stationViewData['data:red'] ? "Red" : null,
+                stationViewData['data:blue'] ? "Blue" : null,
+                stationViewData['data:g'] ? "Green" : null,
+                stationViewData['data:brn'] ? "Brown" : null,
+                stationViewData['data:p'] ? "Purple" : null,
+                stationViewData['data:pexp'] ? "Purple Express" : null,
+                stationViewData['data:y'] ? "Yellow" : null,
+                stationViewData['data:pnk'] ? "Pink" : null,
+                stationViewData['data:o'] ? "Orange" : null,
+            ].filter(Boolean).join(", "),
+            arrivals: arrivalsData.map(arrival => ({
+                route: arrival.rt,
+                destination: arrival.destNm,
+                arrival_time: formatDateTime(arrival.arrT),
+                is_approaching: arrival.isApp === "1" ? "Yes" : "No",
+            })),
+        });
+
+        res.send(rendered);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error fetching data.");
+    }
 });
 
 // Start server

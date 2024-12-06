@@ -32,21 +32,24 @@ FROM kjwassell_cta_ridership_orc;
 -- Drop table if it exists
 DROP TABLE IF EXISTS kjwassell_cta_avg_rides_by_day_orc;
 
--- Create table for average rides by day
-CREATE TABLE kjwassell_cta_avg_rides_by_day_orc (
+-- Create table for total rides and number of days by day
+CREATE TABLE kjwassell_cta_total_rides_by_day_orc (
     station_id STRING,
     station_name STRING,
     day STRING,
-    avg_rides FLOAT
+    total_rides BIGINT, -- Total rides for the station and day
+    num_days INT        -- Number of days contributing to the total rides
 )
 STORED AS ORC;
 
--- Populate table
-INSERT INTO kjwassell_cta_avg_rides_by_day_orc
+
+-- Populate table with total rides and number of days
+INSERT INTO kjwassell_cta_total_rides_by_day_orc
 SELECT 
     station_id,
     station_name,
     day,
-    AVG(rides) AS avg_rides
+    SUM(rides) AS total_rides,        -- Calculate total rides for the station and day
+    COUNT(DISTINCT `date`) AS num_days -- Count distinct dates (number of days)
 FROM kjwassell_cta_ridership_with_day_orc
 GROUP BY station_id, station_name, day;

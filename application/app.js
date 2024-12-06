@@ -23,34 +23,29 @@ var hclient = hbase({
 });
 
 // Function to decode binary-encoded numeric values
-function decodeValue(encodedValue) {
+function decodeValue(encodedValue, columnName = '') {
     const buffer = Buffer.from(encodedValue, 'latin1'); // Convert the value to a Buffer
 
-    // Handle boolean values (single byte)
-    if (buffer.length === 1) {
-        const booleanValue = buffer[0];
-        if (booleanValue === 0x00) {
-            return false; // Decode as `false`
-        } else if (booleanValue === 0x01) {
-            return true; // Decode as `true`
-        }
+    // Handle known cases explicitly
+    if (columnName === 'data:station_name') {
+        return buffer.toString('utf-8').trim(); // Decode as UTF-8 string and trim whitespace
     }
 
-    // Handle numeric values
+    // Handle values based on buffer length
     switch (buffer.length) {
+        case 1: // Single-byte buffer (likely a boolean)
+            return buffer[0] === 0x01; // Return `true` for 0x01, `false` otherwise
         case 4: // 4-byte buffer (likely a float)
             return buffer.readFloatBE();
         case 8: // 8-byte buffer (likely a BigInt64 or Double)
             try {
-                // Try to decode as a 64-bit BigInt (integer)
-                return Number(buffer.readBigInt64BE());
+                return Number(buffer.readBigInt64BE()); // Attempt BigInt decoding
             } catch (err) {
-                // If decoding as BigInt fails, decode as Double (floating point)
-                return buffer.readDoubleBE();
+                return buffer.readDoubleBE(); // Fallback to Double if BigInt fails
             }
-        default:
-            console.warn("Encountered unsupported encoding or non-numeric value:", encodedValue);
-            return encodedValue; // Return the original value if it's not recognized
+        default: // Unsupported encoding or unrecognized value
+            console.warn("Encountered unsupported encoding or unrecognized value:", encodedValue);
+            return buffer.toString('utf-8').trim(); // Default to string decoding as a fallback
     }
 }
 
@@ -59,13 +54,27 @@ function decodeValue(encodedValue) {
 function rowToMap(row) {
     const data = {};
     row.forEach(function (item) {
-        data[item['column']] = decodeValue(item['$']);
+        const columnName = item['column']; // Extract the column name
+        data[columnName] = decodeValue(item['$'], columnName); // Pass column name to decodeValue
     });
     return data;
 }
 
-// Get the current day of the week (e.g., "M", "T", ...)
-const day = moment().format('dd');
+
+function getDayForHBase() {
+    const dayOfWeek = moment().isoWeekday(); // Get ISO weekday (1 = Monday, 7 = Sunday)
+    const hbaseDayMap = {
+        7: 'Su', // Sunday
+        1: 'M',  // Monday
+        2: 'T',  // Tuesday
+        3: 'W',  // Wednesday
+        4: 'Th', // Thursday
+        5: 'F',  // Friday
+        6: 'S'   // Saturday
+    };
+    return hbaseDayMap[dayOfWeek]; // Get the corresponding value
+}
+
 
 // application code
 app.use(express.static('public'));
@@ -79,15 +88,20 @@ app.get('/cta_stop_summary.html', async function (req, res) {
     }
 
     try {
-        // Query HBase for daily average rides
-        const avgRideData = await new Promise((resolve, reject) => {
-            hclient.table('kjwassell_cta_avg_rides_by_day_hbase')
-                .row(`${station}_${moment().format('dd')}`)
+        // Query HBase for total rides and number of days
+        const rideData = await new Promise((resolve, reject) => {
+            hclient.table('kjwassell_cta_total_rides_by_day_hbase')
+                .row(`${station}_${getDayForHBase()}`)
                 .get((err, row) => {
-                    if (err || !row) return reject("No data found for daily average rides.");
+                    if (err || !row) return reject("No data found for rides and days.");
                     resolve(rowToMap(row));
                 });
         });
+
+        // Compute the average rides dynamically
+        const totalRides = parseInt(rideData['data:total_rides'], 10);
+        const numDays = parseInt(rideData['data:num_days'], 10);
+        const avgRides = numDays > 0 ? totalRides / numDays : 0;
 
         // Query HBase for station view data
         const stationViewData = await new Promise((resolve, reject) => {
@@ -120,9 +134,9 @@ app.get('/cta_stop_summary.html', async function (req, res) {
         }
 
         const rendered = mustache.render(template, {
-            station_name: avgRideData['data:station_name'],
+            station_name: rideData['data:station_name'],
             day: moment().format('dddd'),
-            avg_rides: Math.round(avgRideData['data:avg_rides']),
+            avg_rides: Math.round(avgRides), // Use dynamically computed average rides
             ada: stationViewData['data:ada'] === 'true' ? "Yes" : "No",
             lines_serviced: [
                 stationViewData['data:red'] ? "Red" : null,
@@ -149,6 +163,7 @@ app.get('/cta_stop_summary.html', async function (req, res) {
         res.status(500).send("Error fetching data.");
     }
 });
+
 
 // Start server
 app.listen(port, () => {

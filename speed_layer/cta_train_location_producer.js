@@ -8,7 +8,7 @@ const hbase = require('hbase');
 const CTA_API_KEY = process.env.CTA_API_KEY || '1cac44e9a4544e79a0c2a0e1cf933925';
 const API_BASE_URL = 'http://lapi.transitchicago.com/api/1.0/';
 const KAFKA_BROKERS = process.env.KAFKA_BROKERS || 'wn0-kafka.m0ucnnwuiqae3jdorci214t2mf.bx.internal.cloudapp.net:9092';
-const TRAIN_ARRIVALS_TOPIC = 'kjwassell_train_arrivals';
+const TRAIN_ARRIVALS_TOPIC = 'kjwassell_train_locations';
 
 // HBase Client Configuration
 const HBASE_TABLE = 'kjwassell_cta_station_view_hbase';

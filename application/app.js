@@ -35,8 +35,12 @@ function decodeValue(encodedValue, columnName = '') {
     switch (buffer.length) {
         case 1: // Single-byte buffer (likely a boolean)
             return buffer[0] === 0x01; // Return `true` for 0x01, `false` otherwise
-        case 4: // 4-byte buffer (likely a float)
-            return buffer.readFloatBE();
+        case 4: // 4-byte buffer
+            if (columnName === 'data:num_days') {
+                return buffer.readInt32BE(); // Decode as 32-bit integer
+            } else {
+                return buffer.readFloatBE(); // Decode as Float if no specific column is indicated
+            }
         case 8: // 8-byte buffer (likely a BigInt64 or Double)
             try {
                 return Number(buffer.readBigInt64BE()); // Attempt BigInt decoding
@@ -48,6 +52,7 @@ function decodeValue(encodedValue, columnName = '') {
             return buffer.toString('utf-8').trim(); // Default to string decoding as a fallback
     }
 }
+
 
 
 // Function to map a row of HBase data to a more readable format
@@ -78,6 +83,7 @@ function getDayForHBase() {
 
 // application code
 app.use(express.static('public'));
+
 // Endpoint to get stop summary including arrivals
 app.get('/cta_stop_summary.html', async function (req, res) {
     const station = req.query['station'];
@@ -99,8 +105,8 @@ app.get('/cta_stop_summary.html', async function (req, res) {
         });
 
         // Compute the average rides dynamically
-        const totalRides = parseInt(rideData['data:total_rides'], 10);
-        const numDays = parseInt(rideData['data:num_days'], 10);
+        const totalRides = rideData['data:total_rides'];
+        const numDays = rideData['data:num_days'];
         const avgRides = numDays > 0 ? totalRides / numDays : 0;
 
         // Query HBase for station view data
@@ -165,7 +171,32 @@ app.get('/cta_stop_summary.html', async function (req, res) {
 });
 
 
+var kafka = require('kafka-node');
+var Producer = kafka.Producer;
+var KeyedMessage = kafka.KeyedMessage;
+var kafkaClient = new kafka.KafkaClient({kafkaHost: process.argv[4]});
+var kafkaProducer = new Producer(kafkaClient);
+
+// endpoint for the station entry form
+app.get('/submit_entries.html', async function (req, res) {
+    var station_val = req.query['station'];
+    var entries = req.query['entries'];
+    var report = {
+        station: station_val,
+        entry_number: entries,
+    }
+
+    kafkaProducer.send([{ topic: 'kjwassell_station_entries', messages: JSON.stringify(report)}],
+        function (err, data) {
+            console.log(err);
+            console.log(report);
+            res.redirect('submit_entries.html');
+        });
+});
+
 // Start server
 app.listen(port, () => {
     console.log(`App running at http://localhost:${port}`);
 });
+kafka-topics.sh --bootstrap-server $KAFKABROKERS --list
+

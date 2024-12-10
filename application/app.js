@@ -198,5 +198,4 @@ app.get('/submit_entries.html', async function (req, res) {
 app.listen(port, () => {
     console.log(`App running at http://localhost:${port}`);
 });
-kafka-topics.sh --bootstrap-server $KAFKABROKERS --list
 

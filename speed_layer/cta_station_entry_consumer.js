@@ -26,7 +26,7 @@ console.log(`Listening to Kafka topic: ${KAFKA_TOPIC}`);
 
 const url = new URL(HBASE_REST_URL);
 
-var hclient = hclient({
+var hclient = hbase({
     host: url.hostname,
     path: url.pathname ?? "/",
     port: url.port ?? 'http' ? 80 : 443, // http or https defaults

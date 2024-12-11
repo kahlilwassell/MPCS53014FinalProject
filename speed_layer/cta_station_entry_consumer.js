@@ -4,9 +4,9 @@ const kafka = require('kafka-node');
 const axios = require('axios');
 
 // Configuration
-const KAFKA_BROKERS = process.env.KAFKA_BROKERS || 'wn0-kafka.m0ucnnwuiqae3jdorci214t2mf.bx.internal.cloudapp.net:9092';
+const HBASE_REST_URL = process.argv[2];
+const KAFKA_BROKERS = process.argv[3];
 const KAFKA_TOPIC = 'kjwassell_station_entries';
-const HBASE_REST_URL = process.env.HBASE_REST_URL || 'http://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest';
 
 // Table Names
 const TOTAL_RIDES_TABLE = 'kjwassell_cta_total_rides_by_day_hbase';
@@ -26,6 +26,7 @@ console.log(`Listening to Kafka topic: ${KAFKA_TOPIC}`);
 function getDayKey() {
     const days = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S'];
     const dayIndex = new Date().getDay();
+    console.log(days[dayIndex])
     return days[dayIndex];
 }
 

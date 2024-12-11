@@ -1,9 +1,142 @@
 # MPCS53014FinalProject
 This was my Final Project for the UChicago course MPCS53014 Big Data Application Architecture
-**Steps for Running the Application**
+# CTA Transit Optimization Application
+
+## Overview
+
+The CTA Transit Optimization Application is a comprehensive data-driven solution designed to provide real-time insights into Chicago Transit Authority (CTA) operations. This project combines historical data analysis, real-time streaming, and predictive modeling to enhance user experience, improve transit planning, and optimize station and train management.
+
+The application integrates multiple technologies, including Kafka, Spark Streaming, HBase, Hive, and a web front end, to deliver a rich set of features such as real-time train tracking, station metrics, and predicted crowding analysis. 
+
+---
+
+## Features
+
+### 1. **Historical Analysis**
+   - **Daily Average Ridership by Station and Day**: Displays historical average ridership data for any station and day of the week.
+   - **Total Rides by Station and Day**: Tracks cumulative ridership totals and updates incrementally based on real-time station entry events.
+   - **Crowding Prediction**: Uses machine learning models to predict station crowding based on historical trends and additional features.
+
+### 2. **Real-Time Analytics**
+   - **Train Location Tracking**: Visualizes current train locations and movements along selected routes using live data from the CTA Train Tracker API.
+   - **Station Entry Tracking**: Captures station entry events in real time via Kafka and updates batch views in HBase.
+   - **Interactive Maps**: Displays train locations on a map for selected routes, aiding in passenger decision-making.
+
+### 3. **Web Interface**
+   - **Dropdown Selections**: Users can select a station or train line to view corresponding metrics and visualizations.
+   - **Real-Time Visualizations**: Presents dynamic information about train locations and station metrics.
+   - **User Input Integration**: Allows users to log station entries, which feed directly into the real-time processing pipeline.
+
+---
+
+## Architecture
+
+### Data Flow
+1. **Historical Data Pipeline**:
+   - Data ingested into HBase and Hive for historical analysis.
+   - Tables include:
+     - `kjwassell_cta_total_rides_by_day_hbase` (batch view for station totals).
+     - `kjwassell_cta_avg_rides_by_day_hbase` (daily averages by station and day).
+
+2. **Real-Time Pipeline**:
+   - **Kafka**:
+     - `train-locations`: Captures live train locations fetched from the CTA API.
+     - `kjwassell_station_entries`: Logs real-time station entries from user inputs.
+   - **Spark Streaming**:
+     - Processes station entry events and updates HBase tables dynamically.
+     - Consumes train location data and publishes processed information to `processed-locations`.
+   - **HBase**:
+     - Stores batch and real-time views of station and train data.
+
+3. **Web Front End**:
+   - Interactive forms for station and train line selection.
+   - Visualization of train locations and station metrics.
+
+---
+
+## Technology Stack
+
+### Core Components
+- **HBase**: Batch and real-time views of ridership and train data.
+- **Kafka**: Real-time message broker for train location and station entry streams.
+- **Spark Streaming**: Processes Kafka streams to update HBase and provide real-time analytics.
+- **Hive**: Query and manage historical data.
+- **Python/Scala**: For Kafka producers and Spark jobs.
+- **JavaScript, HTML, CSS**: Front-end implementation.
+
+### APIs and Libraries
+- **CTA Train Tracker API**: Source of real-time train location data.
+- **Moment.js**: Handles date and time formatting in the front end.
+- **Jackson & Spark Kafka**: Manages JSON data deserialization in Scala.
+- **HBase Client**: Interacts with HBase for reading and writing.
+
+---
+
+## Installation and Setup
+
+### Prerequisites
+1. **Environment**:
+   - A distributed cluster with Kafka, HBase, Hive, and Spark installed.
+   - Node.js for running the web application.
+   - Maven for building Scala jobs.
+
+2. **API Key**:
+   - Obtain a CTA Train Tracker API key and update the `.env` file.
+
+### Steps
+1. **Clone the Repository**:
+   `git clone https://github.com/yourusername/cta-transit-optimization.git`
+   `cd cta-transit-optimization`
+
+2. **Install Dependencies**
+  - Node.js: `npm install`
+  - Maven (for Scala Spark jobs): `mvn clean install`
+
+3. **Set Up Kafka Topics**: bash kafka-topics.sh --create --topic train-locations --bootstrap-server $KAFKA_BROKERS kafka-topics.sh --create --topic kjwassell_station_entries --bootstrap-server $KAFKA_BROKERS
+
+4. **Run Spark Streaming Jobs**:
+spark-submit --class StreamStationEntries \
+    --master yarn \
+    --deploy-mode cluster \
+    --jars /path/to/hbase-client.jar,/path/to/spark-streaming-kafka.jar \
+    target/stream_kafka_station_entries-1.0-SNAPSHOT.jar $KAFKA_BROKERS
+
+5. **Start the Web Application**: `node app.js 3000`
+
+### Usage
+**Web Application**
+1. Access the application in your browser at http://<hostname>:3000.
+2. Select a station or train line to view real-time data and predictions.
+3. Enter station entries to simulate live events.
+**Real-Time Insights**
+1. View train locations on a dynamic map.
+2. Monitor crowding predictions for selected stations.
+**Administrative Tools**
+  - HBase Shell:
+        `hbase shell`
+        `scan 'kjwassell_cta_total_rides_by_day_hbase'`
+**Kafka Monitoring:**
+    `kafka-console-consumer.sh --bootstrap-server $KAFKA_BROKERS --topic train-locations`
+**Future Enhancements**
+1. Enhanced Predictive Models:
+  - Incorporate weather and event data for better crowding predictions.
+2. Real-Time Alerts:
+  - Notify users of train delays or heavy crowding.
+3. Expanded Visualization:
+  - Heatmaps for crowding across the entire transit network.
+**Contributors**
+  - Kahlil Wassell (Project Lead and Developer)
+**License**
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+**Acknowledgments**
+Special thanks to the University of Chicago MPCS53014 course and Professor Spertus along with the rest of the course staff for inspiring this project and providing foundational knowledge on big data systems and architecture.
+
+**Abbreviated Steps for Running the Application**
 1) ssh into the cluster `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
-2) start up application `node app.js 3001 https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest $KAFKABROKERS`
-3) start up the kafka consumer to process live updates `spark-submit --class StreamStationEntries --master yarn --deploy-mode cluster --executor-memory 2G --num-executors 3 stream_kafka_station_entries-1.0-SNAPSHOT.jar $KAFKABROKERS`
-4) Set up socks proxy to proxy application `https://edstem.org/us/courses/68329/discussion/5855877`
-5) run the command for tunneling locally `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa -C2qTnNf -D 9876 sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
-6) navigate to url `http://10.0.0.38:3001`
+2) navigate to `~/kjwassell/final_app`
+3) start up application `node app.js 3001 https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest $KAFKABROKERS`
+4) start up the kafka consumer to process live updates `spark-submit-with-hive --class StreamStationEntries --master yarn --deploy-mode cluster --executor-memory 2G --num-executors 3 stream_kafka_station_entries-1.0-SNAPSHOT.jar $KAFKABROKERS`
+5) Set up socks proxy to proxy application `https://edstem.org/us/courses/68329/discussion/5855877`
+6) run the command for tunneling locally `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa -C2qTnNf -D 9876 sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
+7) navigate to url `http://10.0.0.38:3001`

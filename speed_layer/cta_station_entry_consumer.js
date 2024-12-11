@@ -5,7 +5,7 @@ const kafka = require('kafka-node');
 const hbase= require('hbase');
 
 // Configuration
-const HBASE_REST_URL='https://hclient-mpcs53014-2024.azurehdinsight.net/hbaserest'
+const HBASE_REST_URL='https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest'
 const HBASE_AUTH='admin:@a*mJuBS&jA@A8f'
 const KAFKA_BROKERS = process.argv[2];
 const KAFKA_TOPIC = 'kjwassell_station_entries';

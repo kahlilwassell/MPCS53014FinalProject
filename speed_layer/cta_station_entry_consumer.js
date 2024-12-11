@@ -36,6 +36,7 @@ var hclient = hbase({
 });
 
 async function getHBaseValue(table, rowKey, column) {
+    console.log('HBase get payload:', table, rowKey, data);
     return new Promise((resolve, reject) => {
         hclient
             .table(table)
@@ -53,12 +54,22 @@ async function getHBaseValue(table, rowKey, column) {
     });
 }
 
+function base64Encode(value) {
+    return Buffer.from(value).toString('base64');
+}
+
 async function putHBaseValue(table, rowKey, data) {
+    console.log('HBase put payload:', table, rowKey, data);
+    const encodedData = Object.entries(data).reduce((acc, [key, value]) => {
+        acc[base64Encode(key)] = base64Encode(value.toString());
+        return acc;
+    }, {});
+
     return new Promise((resolve, reject) => {
         hclient
             .table(table)
             .row(rowKey)
-            .put(data, (err, success) => {
+            .put(encodedData, (err, success) => {
                 if (err) {
                     console.error(`Error writing to ${table}:${rowKey}`, err);
                     reject(err);
@@ -70,16 +81,21 @@ async function putHBaseValue(table, rowKey, data) {
     });
 }
 
+
 async function incrementHBaseCounterManually(table, rowKey, column, incrementValue) {
     try {
-        const currentValue = await getHBaseValue(table, rowKey, column);
+        const currentValueBase64 = await getHBaseValue(table, rowKey, column);
+        const currentValue = parseInt(Buffer.from(currentValueBase64, 'base64').toString('utf-8'), 10) || 0;
         const newValue = currentValue + incrementValue;
-        await putHBaseValue(table, rowKey, { [column]: newValue.toString() });
+
+        const updatePayload = { [column]: newValue.toString() };
+        await putHBaseValue(table, rowKey, updatePayload);
         console.log(`Incremented ${table}:${rowKey}:${column} by ${incrementValue}, new value: ${newValue}`);
     } catch (error) {
         console.error(`Error incrementing counter manually for ${table}:${rowKey}:${column}`, error);
     }
 }
+
 
 // Helper Functions
 function getDayKey() {

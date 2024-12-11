@@ -1,12 +1,12 @@
 # MPCS53014FinalProject
 This was my Final Project for the UChicago course MPCS53014 Big Data Application Architecture
-# CTA Transit Optimization Application
+# CTA Transit L Monitoring Application
 
 ## Overview
 
-The CTA Transit Optimization Application is a comprehensive data-driven solution designed to provide real-time insights into Chicago Transit Authority (CTA) operations. This project combines historical data analysis, real-time streaming, and predictive modeling to enhance user experience, improve transit planning, and optimize station and train management.
+The CTA Transit L Monitoring Application is a comprehensive data-driven solution designed to provide real-time insights into Chicago Transit Authority (CTA) L train operations. This project combines historical data analysis, real-time streaming, and predictive modeling to enhance user experience, improve transit planning, and optimize station and train management.
 
-The application integrates multiple technologies, including Kafka, Spark Streaming, HBase, Hive, and a web front end, to deliver a rich set of features such as real-time train tracking, station metrics, and predicted crowding analysis. 
+The application integrates multiple technologies, including Kafka, Spark Streaming, HBase, Hive, and a web front end, to deliver a rich set of features such as real-time train tracking, station metrics, and predicted crowding analysis.   
 
 ---
 

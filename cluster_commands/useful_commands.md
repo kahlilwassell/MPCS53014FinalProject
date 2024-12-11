@@ -7,6 +7,8 @@
 `hbase shell`
 **Create a KafkaTopic**
 `kafka-topics.sh --create --replication-factor 3 --partitions 1 --topic <topic_name> --bootstrap-server $KAFKABROKERS`
+**Delete a kafka topic**
+`kafka-topics.sh --delete --topic kjwassell_station_entries --bootstrap-server $KAFKABROKERS`
 **See A List of Kafka Topics on the Cluster**
 `kafka-topics.sh --bootstrap-server $KAFKABROKERS --list`
 **Set Up a dummy Consumer for the Kafka Topic**

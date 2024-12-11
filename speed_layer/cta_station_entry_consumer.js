@@ -1,11 +1,15 @@
 'use strict';
+
 require('dotenv').config();
 const kafka = require('kafka-node');
-const axios = require('axios');
+const HBase = require('hbase');
 
 // Configuration
-const HBASE_REST_URL = process.argv[2];
-const KAFKA_BROKERS = process.argv[3];
+const HBASE_HOST = 'hbase-mpcs53014-2024.azurehdinsight.net';
+const HBASE_PORT = 443; // Azure HBase REST typically runs on HTTPS port
+const HBASE_USER = 'admin';
+const HBASE_PASSWORD = '@a*mJuBS&jA@A8f';
+const KAFKA_BROKERS = process.argv[2];
 const KAFKA_TOPIC = 'kjwassell_station_entries';
 
 // Table Names
@@ -22,63 +26,73 @@ const consumer = new kafka.Consumer(
 
 console.log(`Listening to Kafka topic: ${KAFKA_TOPIC}`);
 
-// Get the current day key (e.g., 'M' for Monday)
+// HBase Connection
+const hbase = HBase({
+    host: HBASE_HOST,
+    port: HBASE_PORT,
+    protocol: 'https', // Use HTTPS for secure connection
+    headers: {
+        authorization: 'Basic ' + Buffer.from(`${HBASE_USER}:${HBASE_PASSWORD}`).toString('base64'),
+    },
+});
+
+function incrementHBaseCounter(table, rowKey, column) {
+    return new Promise((resolve, reject) => {
+        hbase
+            .table(table)
+            .row(rowKey)
+            .increment(column, 1, (err, success) => {
+                if (err) {
+                    console.error(`Error incrementing counter ${table}:${rowKey}:${column}`, err);
+                    reject(err);
+                } else {
+                    console.log(`Successfully incremented ${table}:${rowKey}:${column}`);
+                    resolve(success);
+                }
+            });
+    });
+}
+
+function putHBaseRow(table, rowKey, data) {
+    return new Promise((resolve, reject) => {
+        hbase
+            .table(table)
+            .row(rowKey)
+            .put(data, (err, success) => {
+                if (err) {
+                    console.error(`Error putting row into ${table}:${rowKey}`, err);
+                    reject(err);
+                } else {
+                    console.log(`Successfully put row into ${table}:${rowKey}`);
+                    resolve(success);
+                }
+            });
+    });
+}
+
+// Helper Functions
 function getDayKey() {
     const days = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S'];
     const dayIndex = new Date().getDay();
     return days[dayIndex];
 }
 
-// Get the current date as a string
 function getCurrentDate() {
     const today = new Date();
     return today.toISOString().split('T')[0];
 }
 
-// HBase Increment Helper
-async function incrementCounter(tableName, rowKey, column) {
-    const incrementUrl = `${HBASE_REST_URL}/${tableName}/${rowKey}/${column}`;
-    try {
-        await axios.post(incrementUrl, '1', {
-            headers: { 'Content-Type': 'text/plain' },
-        });
-        console.log(`Incremented ${tableName} at ${rowKey}:${column}`);
-    } catch (error) {
-        console.error(`Error incrementing ${tableName} at ${rowKey}:${column}`, error);
-    }
-}
-
-// HBase Put Row Helper
-async function putRow(tableName, rowKey, data) {
-    const putUrl = `${HBASE_REST_URL}/${tableName}/${rowKey}`;
-    const cells = Object.keys(data).map((key) => ({
-        column: Buffer.from(key).toString('base64'),
-        $: Buffer.from(data[key]).toString('base64'),
-    }));
-
-    try {
-        await axios.put(
-            putUrl,
-            { Row: [{ key: Buffer.from(rowKey).toString('base64'), Cell: cells }] },
-            { headers: { 'Content-Type': 'application/json' } }
-        );
-        console.log(`Inserted/Updated row in ${tableName}: ${rowKey}`);
-    } catch (error) {
-        console.error(`Error inserting/updating ${tableName} at ${rowKey}`, error);
-    }
-}
-
-// Process Kafka Messages
+// Kafka Message Processing
 consumer.on('message', async (message) => {
     console.log('Received message:', message.value);
     try {
-        const data = JSON.parse(message.value); // Parse incoming JSON message
-        const stationId = data.station; // Extract station ID
-        const entryNumber = parseInt(data.entry_number, 10); // Entry count
-        const dayKey = getDayKey(); // Get current day key
-        const currentDate = getCurrentDate(); // Get today's date
-        const rowKeyTotalRides = `${stationId}_${dayKey}`; // Total rides row key
-        const rowKeyRidership = `${stationId}_${currentDate}`; // Ridership with day row key
+        const data = JSON.parse(message.value);
+        const stationId = data.station;
+        const entryNumber = parseInt(data.entry_number, 10);
+        const dayKey = getDayKey();
+        const currentDate = getCurrentDate();
+        const rowKeyTotalRides = `${stationId}_${dayKey}`;
+        const rowKeyRidership = `${stationId}_${currentDate}`;
 
         console.log('Processing station entry:', {
             stationId,
@@ -90,7 +104,7 @@ consumer.on('message', async (message) => {
         });
 
         // Increment total rides by day
-        await incrementCounter(TOTAL_RIDES_TABLE, rowKeyTotalRides, 'data:total_rides');
+        await incrementHBaseCounter(TOTAL_RIDES_TABLE, rowKeyTotalRides, 'data:total_rides');
 
         // Insert/Update ridership with day table
         const ridershipRow = {
@@ -100,15 +114,15 @@ consumer.on('message', async (message) => {
             'data:day': dayKey,
             'data:rides': entryNumber.toString(),
         };
-        await putRow(RIDERSHIP_WITH_DAY_TABLE, rowKeyRidership, ridershipRow);
+        await putHBaseRow(RIDERSHIP_WITH_DAY_TABLE, rowKeyRidership, ridershipRow);
 
-        console.log(`Processed station entry: ${stationId}`);
+        console.log(`Processed station entry for ${stationId}`);
     } catch (error) {
-        console.error('Error processing message:', error);
+        console.error('Error processing Kafka message:', error);
     }
 });
 
-// Handle Consumer Errors
+// Kafka Consumer Error Handling
 consumer.on('error', (error) => {
     console.error('Kafka Consumer error:', error);
 });

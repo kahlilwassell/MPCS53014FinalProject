@@ -1,6 +1,6 @@
 'use strict';
 const http = require('http');
-var assert = require('assert');
+const assert = require('assert');
 const express = require('express');
 const app = express();
 const mustache = require('mustache');
@@ -9,6 +9,7 @@ require('dotenv').config();
 const hbase = require('hbase');
 const moment = require('moment');
 const axios = require('axios');
+const kafka = require('kafka-node');
 
 const port = Number(process.argv[2]);
 const url = new URL(process.env.HBASE_REST_URL);
@@ -170,8 +171,6 @@ app.get('/cta_stop_summary.html', async function (req, res) {
     }
 });
 
-
-var kafka = require('kafka-node');
 var Producer = kafka.Producer;
 var kafkaClient = new kafka.KafkaClient({kafkaHost: process.argv[4]});
 var kafkaProducer = new Producer(kafkaClient);

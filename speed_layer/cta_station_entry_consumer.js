@@ -2,13 +2,11 @@
 
 require('dotenv').config();
 const kafka = require('kafka-node');
-const HBase = require('hbase');
+const hclient = require('hclient');
 
 // Configuration
-const HBASE_HOST = 'hbase-mpcs53014-2024.azurehdinsight.net';
-const HBASE_PORT = 443;
-const HBASE_USER = 'admin';
-const HBASE_PASSWORD = '@a*mJuBS&jA@A8f';
+const HBASE_REST_URL='https://hclient-mpcs53014-2024.azurehdinsight.net/hbaserest'
+const HBASE_AUTH='admin:@a*mJuBS&jA@A8f'
 const KAFKA_BROKERS = process.argv[2];
 const KAFKA_TOPIC = 'kjwassell_station_entries';
 
@@ -26,19 +24,20 @@ const consumer = new kafka.Consumer(
 
 console.log(`Listening to Kafka topic: ${KAFKA_TOPIC}`);
 
-// HBase Connection
-const hbase = HBase({
-    host: HBASE_HOST,
-    port: HBASE_PORT,
-    protocol: 'https', // Use HTTPS for secure connection
-    headers: {
-        authorization: 'Basic ' + Buffer.from(`${HBASE_USER}:${HBASE_PASSWORD}`).toString('base64'),
-    },
+const url = new URL(HBASE_REST_URL);
+
+var hclient = hclient({
+    host: url.hostname,
+    path: url.pathname ?? "/",
+    port: url.port ?? 'http' ? 80 : 443, // http or https defaults
+    protocol: url.protocol.slice(0, -1), // Don't want the colon
+    encoding: 'latin1',
+    auth: HBASE_AUTH
 });
 
 async function getHBaseValue(table, rowKey, column) {
     return new Promise((resolve, reject) => {
-        hbase
+        hclient
             .table(table)
             .row(rowKey)
             .get(column, (err, cells) => {
@@ -56,7 +55,7 @@ async function getHBaseValue(table, rowKey, column) {
 
 async function putHBaseValue(table, rowKey, data) {
     return new Promise((resolve, reject) => {
-        hbase
+        hclient
             .table(table)
             .row(rowKey)
             .put(data, (err, success) => {

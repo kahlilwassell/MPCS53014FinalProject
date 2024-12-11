@@ -140,3 +140,7 @@ Special thanks to the University of Chicago MPCS53014 course and Professor Spert
 5) Set up socks proxy to proxy application `https://edstem.org/us/courses/68329/discussion/5855877`
 6) run the command for tunneling locally `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa -C2qTnNf -D 9876 sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
 7) navigate to url `http://10.0.0.38:3001`
+
+
+curl -X GET -H "Authorization: Basic $(echo -n $HBASE_AUTH | base64)" https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest/
+curl -X GET -u "admin:@a*mJuBS&jA@A8f" https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest/

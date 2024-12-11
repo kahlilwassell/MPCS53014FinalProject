@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 const kafka = require('kafka-node');
-const hclient = require('hclient');
+const hbase= require('hbase');
 
 // Configuration
 const HBASE_REST_URL='https://hclient-mpcs53014-2024.azurehdinsight.net/hbaserest'

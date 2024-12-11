@@ -6,7 +6,7 @@ const HBase = require('hbase');
 
 // Configuration
 const HBASE_HOST = 'hbase-mpcs53014-2024.azurehdinsight.net';
-const HBASE_PORT = 443; // Azure HBase REST typically runs on HTTPS port
+const HBASE_PORT = 443;
 const HBASE_USER = 'admin';
 const HBASE_PASSWORD = '@a*mJuBS&jA@A8f';
 const KAFKA_BROKERS = process.argv[2];
@@ -36,38 +36,50 @@ const hbase = HBase({
     },
 });
 
-function incrementHBaseCounter(table, rowKey, column) {
+async function getHBaseValue(table, rowKey, column) {
     return new Promise((resolve, reject) => {
         hbase
             .table(table)
             .row(rowKey)
-            .increment(column, 1, (err, success) => {
+            .get(column, (err, cells) => {
                 if (err) {
-                    console.error(`Error incrementing counter ${table}:${rowKey}:${column}`, err);
+                    console.error(`Error reading ${table}:${rowKey}:${column}`, err);
                     reject(err);
+                } else if (cells && cells.length > 0) {
+                    resolve(parseInt(cells[0].$ || '0', 10)); // Extract value or default to 0
                 } else {
-                    console.log(`Successfully incremented ${table}:${rowKey}:${column}`);
-                    resolve(success);
+                    resolve(0); // Default to 0 if no value found
                 }
             });
     });
 }
 
-function putHBaseRow(table, rowKey, data) {
+async function putHBaseValue(table, rowKey, data) {
     return new Promise((resolve, reject) => {
         hbase
             .table(table)
             .row(rowKey)
             .put(data, (err, success) => {
                 if (err) {
-                    console.error(`Error putting row into ${table}:${rowKey}`, err);
+                    console.error(`Error writing to ${table}:${rowKey}`, err);
                     reject(err);
                 } else {
-                    console.log(`Successfully put row into ${table}:${rowKey}`);
+                    console.log(`Successfully wrote to ${table}:${rowKey}`);
                     resolve(success);
                 }
             });
     });
+}
+
+async function incrementHBaseCounterManually(table, rowKey, column, incrementValue) {
+    try {
+        const currentValue = await getHBaseValue(table, rowKey, column);
+        const newValue = currentValue + incrementValue;
+        await putHBaseValue(table, rowKey, { [column]: newValue.toString() });
+        console.log(`Incremented ${table}:${rowKey}:${column} by ${incrementValue}, new value: ${newValue}`);
+    } catch (error) {
+        console.error(`Error incrementing counter manually for ${table}:${rowKey}:${column}`, error);
+    }
 }
 
 // Helper Functions
@@ -104,7 +116,7 @@ consumer.on('message', async (message) => {
         });
 
         // Increment total rides by day
-        await incrementHBaseCounter(TOTAL_RIDES_TABLE, rowKeyTotalRides, 'data:total_rides');
+        await incrementHBaseCounterManually(TOTAL_RIDES_TABLE, rowKeyTotalRides, 'data:total_rides', entryNumber);
 
         // Insert/Update ridership with day table
         const ridershipRow = {
@@ -114,7 +126,7 @@ consumer.on('message', async (message) => {
             'data:day': dayKey,
             'data:rides': entryNumber.toString(),
         };
-        await putHBaseRow(RIDERSHIP_WITH_DAY_TABLE, rowKeyRidership, ridershipRow);
+        await putHBaseValue(RIDERSHIP_WITH_DAY_TABLE, rowKeyRidership, ridershipRow);
 
         console.log(`Processed station entry for ${stationId}`);
     } catch (error) {

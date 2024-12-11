@@ -173,24 +173,36 @@ app.get('/cta_stop_summary.html', async function (req, res) {
 
 var kafka = require('kafka-node');
 var Producer = kafka.Producer;
-var KeyedMessage = kafka.KeyedMessage;
 var kafkaClient = new kafka.KafkaClient({kafkaHost: process.argv[4]});
 var kafkaProducer = new Producer(kafkaClient);
 
 // endpoint for the station entry form
 app.get('/submit_entries.html', async function (req, res) {
-    var station_val = req.query['station'];
-    var entries = req.query['entries'];
-    var report = {
-        station: station_val,
-        entry_number: entries,
+    const station_val = req.query['station'];
+    const entries = req.query['entries'];
+
+    if (!station_val || isNaN(entries) || entries < 1) {
+        console.error("Invalid input:", req.query);
+        res.status(400).send("Invalid station or entries.");
+        return;
     }
 
-    kafkaProducer.send([{ topic: 'kjwassell_station_entries', messages: JSON.stringify(report)}],
+    const report = {
+        station: station_val,
+        entry_number: entries,
+    };
+
+    console.log("Publishing report to Kafka:", report);
+
+    kafkaProducer.send([{ topic: 'kjwassell_station_entries', messages: JSON.stringify(report) }],
         function (err, data) {
-            console.log(err);
-            console.log(report);
-            res.redirect('submit_entries.html');
+            if (err) {
+                console.error("Error publishing to Kafka:", err);
+                res.status(500).send("Error submitting entry.");
+            } else {
+                console.log("Successfully published:", data);
+                res.redirect('/cta_stop_summary.html');
+            }
         });
 });
 

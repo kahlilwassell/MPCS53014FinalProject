@@ -166,12 +166,35 @@
                 dropdown.appendChild(option);
             }
         };
+        async function submitForm() {
+            const station = document.getElementById("stationDropdown").value;
+            const entries = document.getElementById("entriesInput").value;
+
+            try {
+                const response = await fetch('/submit_entries', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ station, entries }),
+                });
+
+                if (response.ok) {
+                    alert("Your entry has been successfully submitted!");
+                } else {
+                    alert("There was an issue submitting your entry.");
+                }
+            } catch (error) {
+                console.error("Error submitting form:", error);
+                alert("An error occurred. Please try again.");
+            }
+        }
     </script>
 </head>
 <body style='background-image:URL("cta_train.jpg");background-repeat:no-repeat;background-position:center top;-webkit-background-size:100%;-moz-background-size:100%;-o-background-size:100%;background-size: 100%;'>
 <p style="margin-bottom:2cm" />
 <h2 class="elegant-aero" style="margin-left:30%;text-align:center;display:inline-block;color:#5E5E5E;background:#FFFFFF">&nbsp;Submit Station Entries&nbsp;</h2>
-<form action="/submit_entries.html" style="width:300px;margin:0 auto;padding-top=200px;background:#FFFFFF" method="get" target="results_iframe" class="elegant-aero">
+<form id="stationForm" style="width:300px;margin:0 auto;padding-top=200px;background:#FFFFFF" class="elegant-aero">
     <label>
         <span>Station:</span>
         <select id="stationDropdown" name="station">
@@ -180,14 +203,12 @@
     </label>
     <label>
         <span>Passengers Entering Station:</span>
-        <input type="number" name="entries" value="1"/>
+        <input type="number" name="entries" id="entriesInput" value="1" />
     </label>
     <label>
-        <input type="submit" value="Submit" />
+        <button type="button" onclick="submitForm()">Submit</button>
     </label>
 </form>
-<p style="margin-bottom:2cm" />
-<iframe frameBorder="0" name="results_iframe" style="display:block;width:70%;margin-left:auto;margin-right:auto"></iframe>
 </body>
 </html>
 

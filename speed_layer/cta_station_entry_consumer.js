@@ -17,7 +17,7 @@ const client = new kafka.KafkaClient({ kafkaHost: KAFKA_BROKERS });
 const consumer = new kafka.Consumer(
     client,
     [{ topic: KAFKA_TOPIC, partition: 0 }],
-    { autoCommit: true, fromOffset: 'earliest' }
+    { autoCommit: true, fromOffset: 'latest' }
 );
 
 console.log(`Listening to Kafka topic: ${KAFKA_TOPIC}`);

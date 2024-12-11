@@ -26,7 +26,6 @@ console.log(`Listening to Kafka topic: ${KAFKA_TOPIC}`);
 function getDayKey() {
     const days = ['Su', 'M', 'T', 'W', 'Th', 'F', 'S'];
     const dayIndex = new Date().getDay();
-    console.log(days[dayIndex])
     return days[dayIndex];
 }
 
@@ -39,10 +38,14 @@ function getCurrentDate() {
 // HBase Increment Helper
 async function incrementCounter(tableName, rowKey, column) {
     const incrementUrl = `${HBASE_REST_URL}/${tableName}/${rowKey}/${column}`;
-    await axios.post(incrementUrl, '1', {
-        headers: { 'Content-Type': 'text/plain' },
-    });
-    console.log(`Incremented ${tableName} at ${rowKey}:${column}`);
+    try {
+        await axios.post(incrementUrl, '1', {
+            headers: { 'Content-Type': 'text/plain' },
+        });
+        console.log(`Incremented ${tableName} at ${rowKey}:${column}`);
+    } catch (error) {
+        console.error(`Error incrementing ${tableName} at ${rowKey}:${column}`, error);
+    }
 }
 
 // HBase Put Row Helper
@@ -53,16 +56,21 @@ async function putRow(tableName, rowKey, data) {
         $: Buffer.from(data[key]).toString('base64'),
     }));
 
-    await axios.put(
-        putUrl,
-        { Row: [{ key: Buffer.from(rowKey).toString('base64'), Cell: cells }] },
-        { headers: { 'Content-Type': 'application/json' } }
-    );
-    console.log(`Inserted/Updated row in ${tableName}: ${rowKey}`);
+    try {
+        await axios.put(
+            putUrl,
+            { Row: [{ key: Buffer.from(rowKey).toString('base64'), Cell: cells }] },
+            { headers: { 'Content-Type': 'application/json' } }
+        );
+        console.log(`Inserted/Updated row in ${tableName}: ${rowKey}`);
+    } catch (error) {
+        console.error(`Error inserting/updating ${tableName} at ${rowKey}`, error);
+    }
 }
 
 // Process Kafka Messages
 consumer.on('message', async (message) => {
+    console.log('Received message:', message.value);
     try {
         const data = JSON.parse(message.value); // Parse incoming JSON message
         const stationId = data.station; // Extract station ID
@@ -71,6 +79,15 @@ consumer.on('message', async (message) => {
         const currentDate = getCurrentDate(); // Get today's date
         const rowKeyTotalRides = `${stationId}_${dayKey}`; // Total rides row key
         const rowKeyRidership = `${stationId}_${currentDate}`; // Ridership with day row key
+
+        console.log('Processing station entry:', {
+            stationId,
+            entryNumber,
+            dayKey,
+            currentDate,
+            rowKeyTotalRides,
+            rowKeyRidership,
+        });
 
         // Increment total rides by day
         await incrementCounter(TOTAL_RIDES_TABLE, rowKeyTotalRides, 'data:total_rides');

@@ -18,6 +18,6 @@
 **Command to run my web application**
 `node app.js 3001 https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest $KAFKABROKERS`
 **Command to run Kafka Data Ingestor**
-`spark-submit --class StreamStationEntries --master yarn --deploy-mode cluster --executor-memory 2G --num-executors 3 stream_kafka_station_entries-1.0-SNAPSHOT.jar $KAFKABROKERS`
+`node cta_station_entry_consumer.js https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest $KAFKABROKERS`
 **Steps to set up the application**
 `https://edstem.org/us/courses/68329/discussion/5855877`

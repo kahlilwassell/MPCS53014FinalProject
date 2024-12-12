@@ -142,6 +142,10 @@ spark-submit --class StreamStationEntries \
 https://github.com/user-attachments/assets/47f21285-1627-427c-9f71-59dddace0b9f
 
 
+
+https://github.com/user-attachments/assets/6a142758-f94c-4b47-97de-97ddfb2eb6fd
+
+
 **Future Enhancements**
 1. Enhanced Predictive Models:
   - Incorporate weather and event data for better crowding predictions in addition to day/month machine learning.

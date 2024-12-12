@@ -128,6 +128,7 @@ spark-submit --class StreamStationEntries \
 4) navigate to `~/kjwassell/KafkaToHBase/target`
 5) start up the kafka consumer to process live updates `spark-submit --driver-java-options "-Dlog4j.configuration=file:///home/sshuser/ss.log4j.properties" --class StreamStationEntries uber-KafkaToHBase-1.0-SNAPSHOT.jar $KAFKABROKERS`
 6) Set up socks proxy to proxy application `https://edstem.org/us/courses/68329/discussion/5855877`
+![Screenshot 2024-12-12 at 12 09 58 AM](https://github.com/user-attachments/assets/bf3b4dc0-0bb6-44da-8cc6-239b54a0f2e0)
 7) run the command for tunneling locally `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa -C2qTnNf -D 9876 sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
 8) navigate to url `http://10.0.0.38:3001`
 9) Select a station to view the set of incoming trains and the average entries for the current day of the week.

@@ -161,6 +161,7 @@ https://github.com/user-attachments/assets/6a142758-f94c-4b47-97de-97ddfb2eb6fd
   - Heatmaps for crowding across the entire transit network, and a real time view of train locations.
 
 **Last Minute Notes**
+
 I figured out there was a small bug in my speed layer at the last moment. This was in updating one of the tables that I have for the kafka consumer where it will overwrite the number of rides accidentally for one of the core tables. I would fix this if there was time but there is not.
 
 **Contributors**

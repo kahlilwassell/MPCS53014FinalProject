@@ -119,6 +119,11 @@ spark-submit --class StreamStationEntries \
 5. **Start the Web Application**: `node app.js 3000`
 
 ### Usage
+The github page for this repo can be found [here](https://github.com/kahlilwassell/MPCS53014FinalProject/blob/main/README.md). Cloning this repo will give you access to all of the code I used to create and run this application.
+Here is a list of the locations of the mot important components
+1) The front end Application code can be found at `~/kjwassell/final_app`
+2) The jar for the Kafka Consumer can be found at  `~/kjwassell/KafkaToHBase/target`
+3) I have manually cloned the rest of the repo here as well at `~/kjwassell/MPCS53014FinalProject`
 
 **Steps for Running the Application**
 1) ssh into the cluster `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
@@ -138,13 +143,12 @@ spark-submit --class StreamStationEntries \
     
 ### Demos
 
-
-
 https://github.com/user-attachments/assets/47f21285-1627-427c-9f71-59dddace0b9f
 
 
 
 https://github.com/user-attachments/assets/6a142758-f94c-4b47-97de-97ddfb2eb6fd
+
 ![Screenshot 2024-12-12 at 1 10 17 AM](https://github.com/user-attachments/assets/78bbed2f-67f1-4f90-8458-1e31aeff14a4)
 
 
@@ -155,6 +159,10 @@ https://github.com/user-attachments/assets/6a142758-f94c-4b47-97de-97ddfb2eb6fd
   - Notify users of train delays or heavy crowding.
 3. Expanded Visualization:
   - Heatmaps for crowding across the entire transit network, and a real time view of train locations.
+
+**Last Minute Notes**
+I figured out there was a small bug in my speed layer at the last moment. This was in updating one of the tables that I have for the kafka consumer where it will overwrite the number of rides accidentally for one of the core tables. I would fix this if there was time but there is not.
+
 **Contributors**
   - Kahlil Wassell (Project Lead and Developer)
 

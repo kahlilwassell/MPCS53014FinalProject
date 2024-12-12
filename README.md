@@ -137,11 +137,11 @@ spark-submit --class StreamStationEntries \
 
 **Future Enhancements**
 1. Enhanced Predictive Models:
-  - Incorporate weather and event data for better crowding predictions.
+  - Incorporate weather and event data for better crowding predictions in addition to day/month machine learning.
 2. Real-Time Alerts:
   - Notify users of train delays or heavy crowding.
 3. Expanded Visualization:
-  - Heatmaps for crowding across the entire transit network.
+  - Heatmaps for crowding across the entire transit network, and a real time view of train locations.
 **Contributors**
   - Kahlil Wassell (Project Lead and Developer)
 

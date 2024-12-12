@@ -35,6 +35,7 @@ The application integrates multiple technologies, including Kafka, HBase, Hive, 
 ### Data Flow
 1. **Historical Data Pipeline**:
    - Data ingested into HBase and Hive for historical analysis.
+   -    The Primary Data sources of the application are the data sets for [CTA ridership](https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f/about_data) and [CTA stops](https://data.cityofchicago.org/Transportation/CTA-System-Information-List-of-L-Stops/8pix-ypme/about_data) In addition to the real time [cta train tracker api](https://www.transitchicago.com/assets/1/6/cta_Train_Tracker_API_Developer_Guide_and_Documentation.pdf).
    - Tables include:
     **Data Lake / Batch Layer**
     - `kjwassell_cta_ridership_csv` (data lake ridership representation in Hive)

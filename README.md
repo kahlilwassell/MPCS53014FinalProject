@@ -134,6 +134,7 @@ spark-submit --class StreamStationEntries \
 10) Navigate to `http://10.0.0.38:3001/submit_entry.html` and select the station and the number of passengers entering.
 **Kafka Monitoring:**
     `kafka-console-consumer.sh --bootstrap-server $KAFKA_BROKERS --topic train-locations`
+
 **Future Enhancements**
 1. Enhanced Predictive Models:
   - Incorporate weather and event data for better crowding predictions.

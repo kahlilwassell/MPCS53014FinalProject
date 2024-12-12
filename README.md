@@ -5,7 +5,7 @@ This was my Final Project for the UChicago course MPCS53014 Big Data Application
 
 ## Overview
 
-The CTA Transit L Monitoring Application is a comprehensive data-driven solution designed to provide real-time insights into Chicago Transit Authority (CTA) L train operations. This project combines historical data analysis, real-time streaming, and predictive modeling to enhance user experience, improve transit planning, and optimize station and train management.
+The CTA Transit L Monitoring Application is a comprehensive data-driven solution designed to provide real-time insights into Chicago Transit Authority (CTA) L train operations. This project combines historical data analysis, and real-time streaming to enhance user experience, improve transit planning, and optimize station and train management.
 
 The application integrates multiple technologies, including Kafka, HBase, Hive, and a web front end, to deliver a rich set of features such as real-time train tracking, station metrics, and predicted crowding analysis. This application loosely follows the lambda architecture using a data lake, a batch layer, a serving layer, and a speed layer.
 
@@ -16,7 +16,6 @@ The application integrates multiple technologies, including Kafka, HBase, Hive, 
 ### 1. **Historical Analysis**
    - **Daily Average Ridership by Station and Day**: Displays historical average ridership data for any station and day of the week.
    - **Total Rides by Station and Day**: Tracks cumulative ridership totals and updates incrementally based on real-time station entry events.
-   - **Crowding Prediction**: Uses machine learning models to predict station crowding based on historical trends.
 
 ### 2. **Real-Time Analytics**
    - **Train Location Tracking**: Visualizes current train locations and movements along selected routes using live data from the CTA Train Tracker API.
@@ -57,9 +56,8 @@ The application integrates multiple technologies, including Kafka, HBase, Hive, 
 2. **Real-Time Pipeline**:
    - **Kafka**:
      - `kjwassell_station_entries`: Logs real-time station entries from user inputs in the web application.
-   - **Spark Streaming**:
+   - **Spark/Scala Streaming**:
      - Processes station entry events and updates HBase tables dynamically.
-     - Consumes train location data and makes adjustments to hbase tables that are used for metrics.
    - **HBase**:
      - Stores batch and real-time views of station entry data. incrementing the data for our historical tables.
 
@@ -121,17 +119,19 @@ spark-submit --class StreamStationEntries \
 5. **Start the Web Application**: `node app.js 3000`
 
 ### Usage
-**Web Application**
-1. Access the application in your browser at http://<hostname>:3000.
-2. Select a station or train line to view real-time data and predictions.
-3. Enter station entries to simulate live events.
-**Real-Time Insights**
-1. View train locations on a dynamic map.
-2. Monitor crowding predictions for selected stations.
-**Administrative Tools**
-  - HBase Shell:
-        `hbase shell`
-        `scan 'kjwassell_cta_total_rides_by_day_hbase'`
+
+**Steps for Running the Application**
+1) ssh into the cluster `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
+  - All of the relevant fundmental data for this application can be found in `~/kjwassell/MPCS53014FinalProject/raw_data`
+2) navigate to `~/kjwassell/final_app`
+3) start up application `node app.js 3001 https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest $KAFKABROKERS`
+4) navigate to `~/kjwassell/KafkaToHBase/target`
+5) start up the kafka consumer to process live updates `spark-submit --driver-java-options "-Dlog4j.configuration=file:///home/sshuser/ss.log4j.properties" --class StreamStationEntries uber-KafkaToHBase-1.0-SNAPSHOT.jar $KAFKABROKERS`
+6) Set up socks proxy to proxy application `https://edstem.org/us/courses/68329/discussion/5855877`
+7) run the command for tunneling locally `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa -C2qTnNf -D 9876 sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
+8) navigate to url `http://10.0.0.38:3001`
+9) Select a station to view the set of incoming trains and the average entries for the current day of the week.
+10) Navigate to `http://10.0.0.38:3001/submit_entry.html` and select the station and the number of passengers entering.
 **Kafka Monitoring:**
     `kafka-console-consumer.sh --bootstrap-server $KAFKA_BROKERS --topic train-locations`
 **Future Enhancements**
@@ -143,22 +143,6 @@ spark-submit --class StreamStationEntries \
   - Heatmaps for crowding across the entire transit network.
 **Contributors**
   - Kahlil Wassell (Project Lead and Developer)
-**License**
-This project is licensed under the MIT License. See the LICENSE file for details.
 
 **Acknowledgments**
 Special thanks to the University of Chicago MPCS53014 course and Professor Spertus along with the rest of the course staff for inspiring this project and providing foundational knowledge on big data systems and architecture.
-
-**Abbreviated Steps for Running the Application**
-1) ssh into the cluster `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
-2) navigate to `~/kjwassell/final_app`
-3) start up application `node app.js 3001 https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest $KAFKABROKERS`
-4) start up the kafka consumer to process live updates `spark-submit-with-hive --class StreamStationEntries --master yarn --deploy-mode cluster --executor-memory 2G --num-executors 3 stream_kafka_station_entries-1.0-SNAPSHOT.jar $KAFKABROKERS`
-5) Set up socks proxy to proxy application `https://edstem.org/us/courses/68329/discussion/5855877`
-6) run the command for tunneling locally `ssh -i /Users/kahlilwassell/.ssh/id_MPCS53014_rsa -C2qTnNf -D 9876 sshuser@hbase-mpcs53014-2024-ssh.azurehdinsight.net`
-7) navigate to url `http://10.0.0.38:3001`
-
-
-curl -X GET -H "Authorization: Basic $(echo -n $HBASE_AUTH | base64)" https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest/
-curl -X GET -u "admin:@a*mJuBS&jA@A8f" https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest/
-spark-submit --class StreamStationEntries --master yarn your_jar_file.jar <brokers>

@@ -35,14 +35,16 @@ The application integrates multiple technologies, including Kafka, HBase, Hive, 
 ### Data Flow
 1. **Historical Data Pipeline**:
    - Data ingested into HBase and Hive for historical analysis.
-   -    The Primary Data sources of the application are the data sets for [CTA ridership](https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f/about_data) and [CTA stops](https://data.cityofchicago.org/Transportation/CTA-System-Information-List-of-L-Stops/8pix-ypme/about_data) In addition to the real time [cta train tracker api](https://www.transitchicago.com/assets/1/6/cta_Train_Tracker_API_Developer_Guide_and_Documentation.pdf).
+   - The Primary Data sources of the application are the data sets for [CTA ridership](https://data.cityofchicago.org/Transportation/CTA-Ridership-L-Station-Entries-Daily-Totals/5neh-572f/about_data) and [CTA stops](https://data.cityofchicago.org/Transportation/CTA-System-Information-List-of-L-Stops/8pix-ypme/about_data) In addition to the real time [cta train tracker api](https://www.transitchicago.com/assets/1/6/cta_Train_Tracker_API_Developer_Guide_and_Documentation.pdf).
    - Tables include:
+
     **Data Lake / Batch Layer**
     - `kjwassell_cta_ridership_csv` (data lake ridership representation in Hive)
     - `kjwassell_cta_ridership_orc` (data lake ridership representation in Hive or representation for more efficient querying and view creation)
     - `kjwassell_cta_stations_csv` (data lake station representation in Hive)
     - `kjwassell_cta_stations_orc` (data lake station representation in Hive or representation for more efficient querying and view creation)
     - all of the above tables follow the sushio principle directly mirroring the data they are extracted from.
+    
     **Serving Layer**
     - `kjwassell_cta_station_view_orc` (representation of station with all lines serviced and accessibility information)
     - `kjwassell_cta_ridership_with_day_orc` (representation of ridership information with additional information (day of week) included)

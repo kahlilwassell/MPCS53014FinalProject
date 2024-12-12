@@ -161,3 +161,4 @@ Special thanks to the University of Chicago MPCS53014 course and Professor Spert
 
 curl -X GET -H "Authorization: Basic $(echo -n $HBASE_AUTH | base64)" https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest/
 curl -X GET -u "admin:@a*mJuBS&jA@A8f" https://hbase-mpcs53014-2024.azurehdinsight.net/hbaserest/
+spark-submit --class StreamStationEntries --master yarn your_jar_file.jar <brokers>

@@ -1,12 +1,13 @@
 # MPCS53014FinalProject
-This was my Final Project for the UChicago course MPCS53014 Big Data Application Architecture
+This was my Final Project for the UChicago course MPCS53014 Big Data Application Architecture.
+
 # CTA Transit L Monitoring Application
 
 ## Overview
 
 The CTA Transit L Monitoring Application is a comprehensive data-driven solution designed to provide real-time insights into Chicago Transit Authority (CTA) L train operations. This project combines historical data analysis, real-time streaming, and predictive modeling to enhance user experience, improve transit planning, and optimize station and train management.
 
-The application integrates multiple technologies, including Kafka, Spark Streaming, HBase, Hive, and a web front end, to deliver a rich set of features such as real-time train tracking, station metrics, and predicted crowding analysis.   
+The application integrates multiple technologies, including Kafka, HBase, Hive, and a web front end, to deliver a rich set of features such as real-time train tracking, station metrics, and predicted crowding analysis. This application loosely follows the lambda architecture using a data lake, a batch layer, a serving layer, and a speed layer.
 
 ---
 
@@ -15,10 +16,11 @@ The application integrates multiple technologies, including Kafka, Spark Streami
 ### 1. **Historical Analysis**
    - **Daily Average Ridership by Station and Day**: Displays historical average ridership data for any station and day of the week.
    - **Total Rides by Station and Day**: Tracks cumulative ridership totals and updates incrementally based on real-time station entry events.
-   - **Crowding Prediction**: Uses machine learning models to predict station crowding based on historical trends and additional features.
+   - **Crowding Prediction**: Uses machine learning models to predict station crowding based on historical trends.
 
 ### 2. **Real-Time Analytics**
    - **Train Location Tracking**: Visualizes current train locations and movements along selected routes using live data from the CTA Train Tracker API.
+   - **Station Arrival Tracking**: Diplays current train arrival predictions for a given station using the CTA Train Tracker API.
    - **Station Entry Tracking**: Captures station entry events in real time via Kafka and updates batch views in HBase.
    - **Interactive Maps**: Displays train locations on a map for selected routes, aiding in passenger decision-making.
 
@@ -35,32 +37,47 @@ The application integrates multiple technologies, including Kafka, Spark Streami
 1. **Historical Data Pipeline**:
    - Data ingested into HBase and Hive for historical analysis.
    - Tables include:
-     - `kjwassell_cta_total_rides_by_day_hbase` (batch view for station totals).
-     - `kjwassell_cta_avg_rides_by_day_hbase` (daily averages by station and day).
+    **Data Lake / Batch Layer**
+    - `kjwassell_cta_ridership_csv` (data lake ridership representation in Hive)
+    - `kjwassell_cta_ridership_orc` (data lake ridership representation in Hive or representation for more efficient querying and view creation)
+    - `kjwassell_cta_stations_csv` (data lake station representation in Hive)
+    - `kjwassell_cta_stations_orc` (data lake station representation in Hive or representation for more efficient querying and view creation)
+    - all of the above tables follow the sushio principle directly mirroring the data they are extracted from.
+    **Serving Layer**
+    - `kjwassell_cta_station_view_orc` (representation of station with all lines serviced and accessibility information)
+    - `kjwassell_cta_ridership_with_day_orc` (representation of ridership information with additional information (day of week) included)
+    - `kjwassell_cta_total_rides_by_day_orc` (representation of ridership information aggregating on day of week and summing up rides and number of days for that day of the week)
+    - `kjwassell_cta_station_view_hbase` (representation of station with all lines serviced and accessibility information to serve web application)
+    - `kjwassell_cta_ridership_with_day_hbase` (representation of ridership information with additional information (day of week) included)
+    - `kjwassell_cta_total_rides_by_day_hbase` (representation of ridership information aggregating on day of week and summing up rides and number of days for that day of the week to server web application)
+    - `kjwassell_station_name_to_station_id_hbase` (hbase mapping of station name to station id to populate dropdown in application and facilitate querying)
+    - each of these are more contrived views to glean more meaningful insights from.
+
 
 2. **Real-Time Pipeline**:
    - **Kafka**:
-     - `train-locations`: Captures live train locations fetched from the CTA API.
-     - `kjwassell_station_entries`: Logs real-time station entries from user inputs.
+     - `kjwassell_station_entries`: Logs real-time station entries from user inputs in the web application.
    - **Spark Streaming**:
      - Processes station entry events and updates HBase tables dynamically.
-     - Consumes train location data and publishes processed information to `processed-locations`.
+     - Consumes train location data and makes adjustments to hbase tables that are used for metrics.
    - **HBase**:
-     - Stores batch and real-time views of station and train data.
+     - Stores batch and real-time views of station entry data. incrementing the data for our historical tables.
 
 3. **Web Front End**:
+   - **Javascript, CSS, HTML**
    - Interactive forms for station and train line selection.
-   - Visualization of train locations and station metrics.
+   - Visualization of station metrics (average entries for the given day of the week and selected station and predicted crowding).
+   - Form to feed real time entries into the application by station.
 
 ---
 
 ## Technology Stack
 
 ### Core Components
-- **HBase**: Batch and real-time views of ridership and train data.
-- **Kafka**: Real-time message broker for train location and station entry streams.
-- **Spark Streaming**: Processes Kafka streams to update HBase and provide real-time analytics.
 - **Hive**: Query and manage historical data.
+- **HBase**: Batch and real-time views of ridership and train data.
+- **Kafka**: Real-time message broker for and station entry streams.
+- **Spark Streaming**: Processes Kafka streams to update HBase and provide real-time analytics.
 - **Python/Scala**: For Kafka producers and Spark jobs.
 - **JavaScript, HTML, CSS**: Front-end implementation.
 

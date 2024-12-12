@@ -49,7 +49,6 @@ function decodeValue(encodedValue, columnName = '') {
                 return buffer.readDoubleBE(); // Fallback to Double if BigInt fails
             }
         default: // Unsupported encoding or unrecognized value
-            console.warn("Encountered unsupported encoding or unrecognized value:", encodedValue);
             return buffer.toString('utf-8').trim(); // Default to string decoding as a fallback
     }
 }
@@ -159,7 +158,8 @@ app.get('/cta_stop_summary.html', async function (req, res) {
             arrivals: arrivalsData.map(arrival => ({
                 route: arrival.rt,
                 destination: arrival.destNm,
-                arrival_time: formatDateTime(arrival.arrT),
+                eta: formatDateTime(arrival.arrT),
+                approaching_delayed: arrival.isDly ==="1" ? "Yes" : "No",
                 is_approaching: arrival.isApp === "1" ? "Yes" : "No",
             })),
         });

@@ -27,7 +27,7 @@ SELECT
     rides
 FROM kjwassell_cta_ridership_with_day_orc;
 
--- Table 2: kjwassell_cta_avg_rides_by_day_orc to HBase
+-- Table 2: kjwassell_cta_total_rides_by_day_orc to HBase
 -- Drop the old HBase table
 DROP TABLE IF EXISTS kjwassell_cta_total_rides_by_day_hbase;
 

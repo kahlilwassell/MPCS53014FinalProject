@@ -1,6 +1,6 @@
 # MPCS53014FinalProject
 This was my Final Project for the UChicago course MPCS53014 Big Data Application Architecture.
-
+The github page for this repo can be found [here](https://github.com/kahlilwassell/MPCS53014FinalProject/blob/main/README.md).
 # CTA Transit L Monitoring Application
 
 ## Overview
@@ -18,7 +18,6 @@ The application integrates multiple technologies, including Kafka, HBase, Hive, 
    - **Total Rides by Station and Day**: Tracks cumulative ridership totals and updates incrementally based on real-time station entry events.
 
 ### 2. **Real-Time Analytics**
-   - **Train Location Tracking**: Visualizes current train locations and movements along selected routes using live data from the CTA Train Tracker API.
    - **Station Arrival Tracking**: Diplays current train arrival predictions for a given station using the CTA Train Tracker API.
    - **Station Entry Tracking**: Captures station entry events in real time via Kafka and updates batch views in HBase.
    - **Interactive Maps**: Displays train locations on a map for selected routes, aiding in passenger decision-making.
@@ -103,24 +102,14 @@ The application integrates multiple technologies, including Kafka, HBase, Hive, 
    - Obtain a CTA Train Tracker API key and update the `.env` file.
 
 ### Steps
-1. **Clone the Repository**:
-   `git clone https://github.com/yourusername/cta-transit-optimization.git`
-   `cd cta-transit-optimization`
-
-2. **Install Dependencies**
-  - Node.js: `npm install`
-  - Maven (for Scala Spark jobs): `mvn clean install`
-
-3. **Set Up Kafka Topics**: bash kafka-topics.sh --create --topic train-locations --bootstrap-server $KAFKA_BROKERS kafka-topics.sh --create --topic kjwassell_station_entries --bootstrap-server $KAFKA_BROKERS
-
-4. **Run Spark Streaming Jobs**:
+1. **Run Spark Streaming Jobs**:
 spark-submit --class StreamStationEntries \
     --master yarn \
     --deploy-mode cluster \
     --jars /path/to/hbase-client.jar,/path/to/spark-streaming-kafka.jar \
     target/stream_kafka_station_entries-1.0-SNAPSHOT.jar $KAFKA_BROKERS
 
-5. **Start the Web Application**: `node app.js 3000`
+2. **Start the Web Application**: `node app.js 3000`
 
 ### Usage
 The github page for this repo can be found [here](https://github.com/kahlilwassell/MPCS53014FinalProject/blob/main/README.md). Cloning this repo will give you access to all of the code I used to create and run this application.
@@ -164,9 +153,6 @@ https://github.com/user-attachments/assets/6a142758-f94c-4b47-97de-97ddfb2eb6fd
 3. Expanded Visualization:
   - Heatmaps for crowding across the entire transit network, and a real time view of train locations.
 
-**Last Minute Notes**
-
-I figured out there was a small bug in my speed layer at the last moment. This was in updating one of the tables that I have for the kafka consumer where it will overwrite the number of rides accidentally for one of the core tables. I would fix this if there was time but there is not.
 
 **Contributors**
   - Kahlil Wassell (Project Lead and Developer)

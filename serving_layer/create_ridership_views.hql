@@ -30,7 +30,7 @@ SELECT
 FROM kjwassell_cta_ridership_orc;
 
 -- Drop table if it exists
-DROP TABLE IF EXISTS kjwassell_cta_avg_rides_by_day_orc;
+DROP TABLE IF EXISTS kjwassell_cta_total_rides_by_day_orc ;
 
 -- Create table for total rides and number of days by day
 CREATE TABLE kjwassell_cta_total_rides_by_day_orc (

@@ -186,9 +186,21 @@ app.get('/submit_entries.html', async function (req, res) {
         return;
     }
 
+    const currentDate = moment().format('YYYY-MM-DD');
+    // Query HBase for total rides and number of days
+    const rideData = await new Promise((resolve, reject) => {
+        hclient.table('kjwassell_cta_total_rides_by_day_hbase')
+            .row(`${station_val}_${getDayForHBase()}`)
+            .get((err, row) => {
+                if (err || !row) return reject("No data found for rides and days.");
+                resolve(rowToMap(row));
+            });
+    });
     const report = {
         station: station_val,
+        station_name: rideData["data:station_name"],
         entry_number: entries,
+        date: currentDate
     };
 
     console.log("Publishing report to Kafka:", report);

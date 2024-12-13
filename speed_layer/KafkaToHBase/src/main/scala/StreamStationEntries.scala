@@ -13,7 +13,7 @@ import org.apache.hadoop.hbase.HBaseConfiguration
 import org.apache.hadoop.hbase.client.{ConnectionFactory, Put, Table}
 import org.apache.hadoop.hbase.util.Bytes
 
-case class StationEntry(station: String, entry_number: Int)
+case class StationEntry(station: String, station_name: String, entry_number: Int, date: String)
 
 object StreamStationEntries {
   val mapper = new ObjectMapper()
@@ -45,7 +45,7 @@ object StreamStationEntries {
       "key.deserializer" -> classOf[StringDeserializer],
       "value.deserializer" -> classOf[StringDeserializer],
       "group.id" -> "cta_station_entries_group",
-      "auto.offset.reset" -> "earliest",
+      "auto.offset.reset" -> "latest",
       "enable.auto.commit" -> (false: java.lang.Boolean)
     )
 
@@ -90,9 +90,20 @@ object StreamStationEntries {
 
           // Check and update total rides table
           val totalRidesResult = totalRidesTable.get(new org.apache.hadoop.hbase.client.Get(Bytes.toBytes(totalRidesRowKey)))
-          val currentTotalRides = if (totalRidesResult.isEmpty) 0 else Bytes.toInt(totalRidesResult.getValue(Bytes.toBytes("data"), Bytes.toBytes("total_rides")))
-          val newTotalRides = currentTotalRides + entry.entry_number
 
+          // Check if the row or column exists, initialize if missing
+          val currentTotalRides = if (totalRidesResult.isEmpty ||
+            !totalRidesResult.containsColumn(Bytes.toBytes("data"), Bytes.toBytes("total_rides"))) {
+            println(s"Row or column missing for key: $totalRidesRowKey, initializing to 0")
+            0L
+          } else {
+            Bytes.toLong(totalRidesResult.getValue(Bytes.toBytes("data"), Bytes.toBytes("total_rides")))
+          }
+
+          // Calculate the new total rides
+          val newTotalRides = currentTotalRides + entry.entry_number.toLong
+
+          // Prepare and execute the Put operation
           val totalRidesPut = new Put(Bytes.toBytes(totalRidesRowKey))
           totalRidesPut.addColumn(Bytes.toBytes("data"), Bytes.toBytes("total_rides"), Bytes.toBytes(newTotalRides))
           totalRidesTable.put(totalRidesPut)
@@ -104,12 +115,15 @@ object StreamStationEntries {
 
           val ridershipPut = new Put(Bytes.toBytes(ridershipRowKey))
           ridershipPut.addColumn(Bytes.toBytes("data"), Bytes.toBytes("station_id"), Bytes.toBytes(entry.station))
-          ridershipPut.addColumn(Bytes.toBytes("data"), Bytes.toBytes("date"), Bytes.toBytes(currentDate))
+          ridershipPut.addColumn(Bytes.toBytes("data"), Bytes.toBytes("date"), Bytes.toBytes(entry.date))
           ridershipPut.addColumn(Bytes.toBytes("data"), Bytes.toBytes("day"), Bytes.toBytes(dayKey))
           ridershipPut.addColumn(Bytes.toBytes("data"), Bytes.toBytes("rides"), Bytes.toBytes(newRidership))
+          ridershipPut.addColumn(Bytes.toBytes("data"), Bytes.toBytes("station_name"), Bytes.toBytes(entry.station_name))
           ridershipTable.put(ridershipPut)
 
-          println(s"Successfully processed entry: $entry, Total Rides: $newTotalRides, Ridership: $newRidership")
+          println(s"Successfully processed station entry: Station ID = ${entry.station}, Day Key = $dayKey")
+          println(s"Total Rides for RowKey $totalRidesRowKey updated to: $newTotalRides")
+          println(s"Ridership for RowKey $ridershipRowKey updated to: $newRidership (Added ${entry.entry_number} rides)")
         } catch {
           case e: Exception =>
             println(s"Error processing entry: $entry")
